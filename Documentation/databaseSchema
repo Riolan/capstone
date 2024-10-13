@@ -9,15 +9,7 @@ CREATE TABLE user_info (
     app_configuration JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP WITH TIME ZONE
-);
-
-CREATE TABLE user_settings (
-    user_id INTEGER PRIMARY KEY,
-    alert_preferences JSONB,
-    notification_settings JSONB,
-    camera_access_list JSONB,
-    motion_sensitivity INTEGER,
-    FOREIGN KEY (user_id) REFERENCES user_info(user_id) ON DELETE CASCADE
+  user_settings JSONB
 );
 
 CREATE TABLE camera (
@@ -164,15 +156,5 @@ CREATE TABLE camera_activity_log (
     activity_type VARCHAR(100),
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     details TEXT,
-    FOREIGN KEY (camera_id) REFERENCES camera(camera_id) ON DELETE CASCADE
-);
-
-CREATE TABLE storage_sync_status (
-    sync_id SERIAL PRIMARY KEY,
-    camera_id INTEGER NOT NULL,
-    data_type VARCHAR(100),
-    last_sync_time TIMESTAMP WITH TIME ZONE,
-    sync_status VARCHAR(50),
-    conflict_resolution TEXT,
     FOREIGN KEY (camera_id) REFERENCES camera(camera_id) ON DELETE CASCADE
 );
