@@ -1,0 +1,178 @@
+-- Full Database Schema for Smart Trail Camera System
+
+CREATE TABLE user_info (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(256) NOT NULL,
+    phone_number VARCHAR(20),
+    app_configuration JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TABLE user_settings (
+    user_id INTEGER PRIMARY KEY,
+    alert_preferences JSONB,
+    notification_settings JSONB,
+    camera_access_list JSONB,
+    motion_sensitivity INTEGER,
+    FOREIGN KEY (user_id) REFERENCES user_info(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE camera (
+    camera_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    camera_name VARCHAR(100),
+    location VARCHAR(150),
+    is_active BOOLEAN DEFAULT TRUE,
+    date_added TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user_info(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE camera_node_configuration (
+    camera_id INTEGER PRIMARY KEY,
+    detection_zone JSONB,
+    motion_sensitivity INTEGER,
+    animal_detection_enabled BOOLEAN,
+    recording_schedule JSONB,
+    FOREIGN KEY (camera_id) REFERENCES camera(camera_id) ON DELETE CASCADE
+);
+
+CREATE TABLE test_dataset (
+    test_id SERIAL PRIMARY KEY,
+    dataset_name VARCHAR(150) NOT NULL,
+    dataset_description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    used_in_model_version VARCHAR(50),
+    image_path VARCHAR(255) NOT NULL,
+    bounding_boxes JSONB NOT NULL,
+    object_label VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE training_dataset (
+    training_id SERIAL PRIMARY KEY,
+    dataset_name VARCHAR(150) NOT NULL,
+    dataset_description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    used_in_model_version VARCHAR(50),
+    image_path VARCHAR(255) NOT NULL,
+    bounding_boxes JSONB NOT NULL,
+    object_label VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE training_results (
+    result_id SERIAL PRIMARY KEY,
+    image_path VARCHAR(255) NOT NULL,
+    bounding_boxes JSONB NOT NULL,
+    confidence_score FLOAT NOT NULL,
+    model_version VARCHAR(50) NOT NULL,
+    classification_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    ground_truth_label VARCHAR(100),
+    evaluation_metric JSONB,
+    training_dataset_id INTEGER NOT NULL,
+    FOREIGN KEY (training_dataset_id) REFERENCES training_dataset(training_id) ON DELETE CASCADE
+);
+
+CREATE TABLE test_results (
+    result_id SERIAL PRIMARY KEY,
+    image_path VARCHAR(255) NOT NULL,
+    bounding_boxes JSONB NOT NULL,
+    confidence_score FLOAT NOT NULL,
+    model_version VARCHAR(50) NOT NULL,
+    classification_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    ground_truth_label VARCHAR(100),
+    evaluation_metric JSONB,
+    test_dataset_id INTEGER NOT NULL,
+    FOREIGN KEY (test_dataset_id) REFERENCES test_dataset(test_id) ON DELETE CASCADE
+);
+
+CREATE TABLE previous_videos (
+    event_id SERIAL PRIMARY KEY,
+    camera_id INTEGER NOT NULL,
+    video_path VARCHAR(200),
+    image_path VARCHAR(200),
+    event_type VARCHAR(50),
+    date_recorded TIMESTAMP WITH TIME ZONE,
+    duration INTEGER,
+    storage_location VARCHAR(100),
+    FOREIGN KEY (camera_id) REFERENCES camera(camera_id) ON DELETE CASCADE
+);
+
+CREATE TABLE live_feed_metadata (
+    feed_id SERIAL PRIMARY KEY,
+    camera_id INTEGER NOT NULL,
+    start_time TIMESTAMP WITH TIME ZONE,
+    end_time TIMESTAMP WITH TIME ZONE,
+    average_quality VARCHAR(50),
+    is_recorded BOOLEAN,
+    FOREIGN KEY (camera_id) REFERENCES camera(camera_id) ON DELETE CASCADE
+);
+
+CREATE TABLE deployed_results (
+    result_id SERIAL PRIMARY KEY,
+    image_path VARCHAR(255) NOT NULL,
+    bounding_boxes JSONB NOT NULL,
+    confidence_score FLOAT NOT NULL,
+    model_version VARCHAR(50) NOT NULL,
+    classification_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    camera_id INTEGER NOT NULL,
+    event_id INTEGER NOT NULL,
+    user_notified BOOLEAN DEFAULT FALSE,
+    alert_triggered BOOLEAN DEFAULT FALSE,
+    action_taken VARCHAR(255),
+    FOREIGN KEY (camera_id) REFERENCES camera(camera_id) ON DELETE CASCADE,
+    FOREIGN KEY (event_id) REFERENCES previous_videos(event_id) ON DELETE CASCADE
+);
+
+CREATE TABLE detected_animal_logs (
+    log_id SERIAL PRIMARY KEY,
+    camera_id INTEGER NOT NULL,
+    animal_detected VARCHAR(100),
+    detection_time TIMESTAMP WITH TIME ZONE,
+    image_path VARCHAR(200),
+    location VARCHAR(150),
+    user_notified BOOLEAN,
+    FOREIGN KEY (camera_id) REFERENCES camera(camera_id) ON DELETE CASCADE
+);
+
+CREATE TABLE alerts (
+    alert_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    camera_id INTEGER NOT NULL,
+    alert_type VARCHAR(100),
+    alert_message TEXT,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_viewed BOOLEAN DEFAULT FALSE,
+    is_dismissed BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES user_info(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (camera_id) REFERENCES camera(camera_id) ON DELETE CASCADE
+);
+
+CREATE TABLE event_log (
+    event_log_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    event_type VARCHAR(100),
+    event_details TEXT,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user_info(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE camera_activity_log (
+    activity_log_id SERIAL PRIMARY KEY,
+    camera_id INTEGER NOT NULL,
+    activity_type VARCHAR(100),
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    details TEXT,
+    FOREIGN KEY (camera_id) REFERENCES camera(camera_id) ON DELETE CASCADE
+);
+
+CREATE TABLE storage_sync_status (
+    sync_id SERIAL PRIMARY KEY,
+    camera_id INTEGER NOT NULL,
+    data_type VARCHAR(100),
+    last_sync_time TIMESTAMP WITH TIME ZONE,
+    sync_status VARCHAR(50),
+    conflict_resolution TEXT,
+    FOREIGN KEY (camera_id) REFERENCES camera(camera_id) ON DELETE CASCADE
+);
