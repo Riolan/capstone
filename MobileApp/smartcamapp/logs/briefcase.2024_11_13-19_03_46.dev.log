@@ -1,0 +1,423 @@
+Date/Time:       2024-11-13 19:03:46 
+Command line:    C:\Users\Joker\AppData\Local\Programs\Python\Python312\Scripts\briefcase dev
+
+OS Release:      Windows 11
+OS Version:      10.0.22631
+Architecture:    AMD64
+Platform:        Windows-11-10.0.22631-SP0
+
+Python exe:      C:\Users\Joker\AppData\Local\Programs\Python\Python312\python.exe
+Python version:  3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+Virtual env:     False
+Conda env:       False
+
+Briefcase:       0.3.20
+Target platform: windows
+Target format:   None
+
+Environment Variables:
+	ALLUSERSPROFILE=C:\ProgramData
+	APPDATA=C:\Users\Joker\AppData\Roaming
+	COMMONPROGRAMFILES=C:\Program Files\Common Files
+	COMMONPROGRAMFILES(X86)=C:\Program Files (x86)\Common Files
+	COMMONPROGRAMW6432=C:\Program Files\Common Files
+	COMPUTERNAME=DESKTOP-6D0TVA4
+	COMSPEC=C:\Windows\system32\cmd.exe
+	DRIVERDATA=C:\Windows\System32\Drivers\DriverData
+	HOMEDRIVE=C:
+	HOMEPATH=\Users\Joker
+	JAVA_HOME=C:\Program Files\Java\jdk-21
+	LOCALAPPDATA=C:\Users\Joker\AppData\Local
+	LOGONSERVER=\\DESKTOP-6D0TVA4
+	NUMBER_OF_PROCESSORS=32
+	ONEDRIVE=C:\Users\Joker\OneDrive
+	ONEDRIVECONSUMER=C:\Users\Joker\OneDrive
+	OS=Windows_NT
+	PATH=C:\Program Files\Common Files\Oracle\Java\javapath;c:\windows\system32;c:\windows;c:\windows\system32\wbem;c:\windows\system32\windowspowershell\v1.0\;c:\windows\system32\openssh\;c:\program files\putty\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk-21\bin;C:\Users\Joker\AppData\Local\Programs\Python\Python312\Scripts\;C:\Users\Joker\AppData\Local\Programs\Python\Python312\;C:\Users\Joker\AppData\Local\Microsoft\WindowsApps;;C:\Program Files\JetBrains\PyCharm 2024.2.4\bin;
+	PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+	PROCESSOR_ARCHITECTURE=AMD64
+	PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 183 Stepping 1, GenuineIntel
+	PROCESSOR_LEVEL=6
+	PROCESSOR_REVISION=b701
+	PROGRAMDATA=C:\ProgramData
+	PROGRAMFILES=C:\Program Files
+	PROGRAMFILES(X86)=C:\Program Files (x86)
+	PROGRAMW6432=C:\Program Files
+	PROMPT=$P$G
+	PSMODULEPATH=C:\Program Files\WindowsPowerShell\Modules;C:\Windows\system32\WindowsPowerShell\v1.0\Modules
+	PUBLIC=C:\Users\Public
+	PYCHARM=C:\Program Files\JetBrains\PyCharm 2024.2.4\bin;
+	PYTHONPATH=C:\Users\Joker\PycharmProjects\smartcamapp\src
+	SESSIONNAME=Console
+	SYSTEMDRIVE=C:
+	SYSTEMROOT=C:\Windows
+	TEMP=C:\Users\Joker\AppData\Local\Temp
+	TMP=C:\Users\Joker\AppData\Local\Temp
+	USERDOMAIN=DESKTOP-6D0TVA4
+	USERDOMAIN_ROAMINGPROFILE=DESKTOP-6D0TVA4
+	USERNAME=Joker
+	USERPROFILE=C:\Users\Joker
+	VBOX_MSI_INSTALL_PATH=C:\Program Files\Oracle\VirtualBox\
+	WINDIR=C:\Windows
+	WSLENV=WT_SESSION:WT_PROFILE_ID:
+	WT_PROFILE_ID={0caa0dad-35be-5f56-a8ff-afceeeaa6101}
+	WT_SESSION=d8c03141-80ca-46cb-8d86-0d273a91a093
+	ZES_ENABLE_SYSMAN=1
+
+pyproject.toml:
+# This project was generated with 0.3.20 using template: https://github.com/beeware/briefcase-template@v0.3.20
+[tool.briefcase]
+project_name = "Smart Cam App"
+bundle = "com.example"
+version = "0.0.1"
+url = "https://example.com/smartcamapp"
+license.file = "LICENSE"
+author = "STCgroup"
+author_email = "stcgroup@example.com"
+
+[tool.briefcase.app.smartcamapp]
+formal_name = "Smart Cam App"
+description = "sd camera design app"
+long_description = """More details about the app should go here.
+"""
+sources = [
+    "src/smartcamapp",
+]
+test_sources = [
+    "tests",
+]
+
+requires = [
+]
+test_requires = [
+    "pytest",
+]
+
+[tool.briefcase.app.smartcamapp.macOS]
+universal_build = true
+requires = [
+    "toga-cocoa~=0.4.7",
+    "std-nslog~=1.0.3",
+]
+
+[tool.briefcase.app.smartcamapp.linux]
+requires = [
+    "toga-gtk~=0.4.7",
+]
+
+[tool.briefcase.app.smartcamapp.linux.system.debian]
+system_requires = [
+    # Needed to compile pycairo wheel
+    "libcairo2-dev",
+    # Needed to compile PyGObject wheel
+    "libgirepository1.0-dev",
+]
+
+system_runtime_requires = [
+    # Needed to provide GTK and its GI bindings
+    "gir1.2-gtk-3.0",
+    "libgirepository-1.0-1",
+    # Dependencies that GTK looks for at runtime
+    "libcanberra-gtk3-module",
+    # Needed to provide WebKit2 at runtime
+    # Note: Debian 11 and Ubuntu 20.04 require gir1.2-webkit2-4.0 instead
+    # "gir1.2-webkit2-4.1",
+]
+
+[tool.briefcase.app.smartcamapp.linux.system.rhel]
+system_requires = [
+    # Needed to compile pycairo wheel
+    "cairo-gobject-devel",
+    # Needed to compile PyGObject wheel
+    "gobject-introspection-devel",
+]
+
+system_runtime_requires = [
+    # Needed to support Python bindings to GTK
+    "gobject-introspection",
+    # Needed to provide GTK
+    "gtk3",
+    # Dependencies that GTK looks for at runtime
+    "libcanberra-gtk3",
+    # Needed to provide WebKit2 at runtime
+    # "webkit2gtk3",
+]
+
+[tool.briefcase.app.smartcamapp.linux.system.suse]
+system_requires = [
+    # Needed to compile pycairo wheel
+    "cairo-devel",
+    # Needed to compile PyGObject wheel
+    "gobject-introspection-devel",
+]
+
+system_runtime_requires = [
+    # Needed to provide GTK
+    "gtk3",
+    # Needed to support Python bindings to GTK
+    "gobject-introspection", "typelib(Gtk) = 3.0",
+    # Dependencies that GTK looks for at runtime
+    "libcanberra-gtk3-module",
+    # Needed to provide WebKit2 at runtime
+    # "libwebkit2gtk3", "typelib(WebKit2)",
+]
+
+[tool.briefcase.app.smartcamapp.linux.system.arch]
+system_requires = [
+    # Needed to compile pycairo wheel
+    "cairo",
+    # Needed to compile PyGObject wheel
+    "gobject-introspection",
+    # Runtime dependencies that need to exist so that the
+    # Arch package passes final validation.
+    # Needed to provide GTK
+    "gtk3",
+    # Dependencies that GTK looks for at runtime
+    "libcanberra",
+    # Needed to provide WebKit2
+    # "webkit2gtk",
+]
+
+system_runtime_requires = [
+    # Needed to provide GTK
+    "gtk3",
+    # Needed to provide PyGObject bindings
+    "gobject-introspection-runtime",
+    # Dependencies that GTK looks for at runtime
+    "libcanberra",
+    # Needed to provide WebKit2 at runtime
+    # "webkit2gtk",
+]
+
+[tool.briefcase.app.smartcamapp.linux.appimage]
+manylinux = "manylinux_2_28"
+
+system_requires = [
+    # Needed to compile pycairo wheel
+    "cairo-gobject-devel",
+    # Needed to compile PyGObject wheel
+    "gobject-introspection-devel",
+    # Needed to provide GTK
+    "gtk3-devel",
+    # Dependencies that GTK looks for at runtime, that need to be
+    # in the build environment to be picked up by linuxdeploy
+    "libcanberra-gtk3",
+    "PackageKit-gtk3-module",
+    "gvfs-client",
+]
+
+linuxdeploy_plugins = [
+    "DEPLOY_GTK_VERSION=3 gtk",
+]
+
+[tool.briefcase.app.smartcamapp.linux.flatpak]
+flatpak_runtime = "org.gnome.Platform"
+flatpak_runtime_version = "47"
+flatpak_sdk = "org.gnome.Sdk"
+
+[tool.briefcase.app.smartcamapp.windows]
+requires = [
+    "toga-winforms~=0.4.7",
+]
+
+# Mobile deployments
+[tool.briefcase.app.smartcamapp.iOS]
+requires = [
+    "toga-iOS~=0.4.7",
+    "std-nslog~=1.0.3",
+]
+
+[tool.briefcase.app.smartcamapp.android]
+requires = [
+    "toga-android~=0.4.7",
+]
+
+base_theme = "Theme.MaterialComponents.Light.DarkActionBar"
+
+build_gradle_dependencies = [
+    "com.google.android.material:material:1.12.0",
+    # Needed for DetailedList
+    # "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0",
+    # Needed for MapView
+    # "org.osmdroid:osmdroid-android:6.1.20",
+]
+
+# Web deployments
+[tool.briefcase.app.smartcamapp.web]
+requires = [
+    "toga-web~=0.4.7",
+]
+style_framework = "Shoelace v2.3"
+
+Briefcase Log:
+[19:03:45]                                                                                                                                                                dev.py:250
+           [smartcamapp] Starting in dev mode...                                                                                                                          dev.py:250
+                                                                                                                                                                   subprocess.py:827
+           >>> Running Command:                                                                                                                                    subprocess.py:827
+           >>>     'C:\Users\Joker\AppData\Local\Programs\Python\Python312\python.exe' -c 'import runpy,                                                           subprocess.py:827
+           sys;sys.path.pop(0);sys.argv.extend([]);runpy.run_module("smartcamapp", run_name="__main__", alter_sys=True)'                                                            
+           >>> Working Directory:                                                                                                                                  subprocess.py:827
+           >>>     C:\Users\Joker                                                                                                                                  subprocess.py:827
+           >>> Environment Overrides:                                                                                                                              subprocess.py:827
+           >>>     PYTHONPATH=C:\Users\Joker\PycharmProjects\smartcamapp\src                                                                                       subprocess.py:827
+           >>>     PYTHONMALLOC=default                                                                                                                            subprocess.py:827
+           >>>     PYTHONUNBUFFERED=1                                                                                                                              subprocess.py:827
+           >>>     PYTHONDEVMODE=1                                                                                                                                 subprocess.py:827
+           >>>     PYTHONUTF8=1                                                                                                                                    subprocess.py:827
+           ===========================================================================                                                                                    run.py:171
+[19:03:46] Windows fatal exception: access violation                                                                                                               subprocess.py:195
+                                                                                                                                                                   subprocess.py:195
+           Current thread 0x00004d5c (most recent call first):                                                                                                     subprocess.py:195
+             File "C:\Users\Joker\AppData\Local\Programs\Python\Python312\Lib\site-packages\jnius\reflect.py", line 19 in <module>                                 subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed                                                                           subprocess.py:195
+             File "<frozen importlib._bootstrap_external>", line 995 in exec_module                                                                                subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 935 in _load_unlocked                                                                                      subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked                                                                            subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 1360 in _find_and_load                                                                                     subprocess.py:195
+             File "C:\Users\Joker\AppData\Local\Programs\Python\Python312\Lib\site-packages\jnius\__init__.py", line 36 in <module>                                subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed                                                                           subprocess.py:195
+             File "<frozen importlib._bootstrap_external>", line 995 in exec_module                                                                                subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 935 in _load_unlocked                                                                                      subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked                                                                            subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 1360 in _find_and_load                                                                                     subprocess.py:195
+             File "C:\Users\Joker\PycharmProjects\smartcamapp\src\smartcamapp\app.py", line 9 in <module>                                                          subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed                                                                           subprocess.py:195
+             File "<frozen importlib._bootstrap_external>", line 995 in exec_module                                                                                subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 935 in _load_unlocked                                                                                      subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked                                                                            subprocess.py:195
+             File "<frozen importlib._bootstrap>", line 1360 in _find_and_load                                                                                     subprocess.py:195
+             File "C:\Users\Joker\PycharmProjects\smartcamapp\src\smartcamapp\__main__.py", line 2 in <module>                                                     subprocess.py:195
+             File "<frozen runpy>", line 88 in _run_code                                                                                                           subprocess.py:195
+             File "<frozen runpy>", line 98 in _run_module_code                                                                                                    subprocess.py:195
+             File "<frozen runpy>", line 226 in run_module                                                                                                         subprocess.py:195
+             File "<string>", line 1 in <module>                                                                                                                   subprocess.py:195
+           Traceback (most recent call last):                                                                                                                      subprocess.py:195
+             File "<string>", line 1, in <module>                                                                                                                  subprocess.py:195
+             File "<frozen runpy>", line 226, in run_module                                                                                                        subprocess.py:195
+             File "<frozen runpy>", line 98, in _run_module_code                                                                                                   subprocess.py:195
+             File "<frozen runpy>", line 88, in _run_code                                                                                                          subprocess.py:195
+             File "C:\Users\Joker\PycharmProjects\smartcamapp\src\smartcamapp\__main__.py", line 2, in <module>                                                    subprocess.py:195
+               from smartcamapp.app import LoginView, SignupView, HomePage                                                                                         subprocess.py:195
+             File "C:\Users\Joker\PycharmProjects\smartcamapp\src\smartcamapp\app.py", line 20, in <module>                                                        subprocess.py:195
+               IS_ANDROID = is_android_environment()                                                                                                               subprocess.py:195
+                            ^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                               subprocess.py:195
+             File "C:\Users\Joker\PycharmProjects\smartcamapp\src\smartcamapp\app.py", line 15, in is_android_environment                                          subprocess.py:195
+               autoclass('org.kivy.android.PythonActivity')  # An Android-specific class in Kivy-based apps                                                        subprocess.py:195
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                        subprocess.py:195
+             File "C:\Users\Joker\AppData\Local\Programs\Python\Python312\Lib\site-packages\jnius\reflect.py", line 209, in autoclass                              subprocess.py:195
+               c = find_javaclass(clsname)                                                                                                                         subprocess.py:195
+                   ^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                         subprocess.py:195
+             File "jnius\\jnius_export_func.pxi", line 22, in jnius.find_javaclass                                                                                 subprocess.py:195
+             File "jnius\\jnius_utils.pxi", line 79, in jnius.check_exception                                                                                      subprocess.py:195
+           jnius.JavaException: JVM exception occurred: org/kivy/android/PythonActivity java.lang.NoClassDefFoundError                                             subprocess.py:195
+                                                                                                                                                                      __main__.py:44
+           Problem running app smartcamapp.                                                                                                                           __main__.py:45
+           Saving log... started                                                                                                                                      console.py:391
+
+Main thread traceback:
+╭─────────────────────────────────────────────────────────────────────── Traceback (most recent call last) ────────────────────────────────────────────────────────────────────────╮
+│ C:\Users\Joker\AppData\Local\Programs\Python\Python312\Lib\site-packages\briefcase\__main__.py:29 in main                                                                        │
+│                                                                                                                                                                                  │
+│   26 │   │   │   Path.cwd() / "pyproject.toml",                                                                                                                                  │
+│   27 │   │   │   overrides=overrides,                                                                                                                                            │
+│   28 │   │   )                                                                                                                                                                   │
+│ ❱ 29 │   │   command(**options)                                                                                                                                                  │
+│   30 │   except HelpText as e:                                                                                                                                                   │
+│   31 │   │   logger.info()                                                                                                                                                       │
+│   32 │   │   logger.info(str(e))                                                                                                                                                 │
+│                                                                                                                                                                                  │
+│ ╭──────────────────────────────────────────────────────── locals ─────────────────────────────────────────────────────────╮                                                      │
+│ │       command = <briefcase.commands.dev.DevCommand object at 0x0000021439C816D0>                                        │                                                      │
+│ │       console = <briefcase.console.Console object at 0x0000021439FB3680>                                                │                                                      │
+│ │             e = BriefcaseCommandError('Problem running app smartcamapp.')                                               │                                                      │
+│ │ extra_cmdline = []                                                                                                      │                                                      │
+│ │        logger = <briefcase.console.Log object at 0x0000021439EF7140>                                                    │                                                      │
+│ │       options = {'appname': None, 'update_requirements': False, 'run_app': True, 'test_mode': False, 'passthrough': []} │                                                      │
+│ │     overrides = {}                                                                                                      │                                                      │
+│ │       printer = <briefcase.console.Printer object at 0x0000021436F27020>                                                │                                                      │
+│ │        result = 200                                                                                                     │                                                      │
+│ ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯                                                      │
+│                                                                                                                                                                                  │
+│ C:\Users\Joker\AppData\Local\Programs\Python\Python312\Lib\site-packages\briefcase\commands\dev.py:252 in __call__                                                               │
+│                                                                                                                                                                                  │
+│   249 │   │   │   else:                                                                                                                                                          │
+│   250 │   │   │   │   self.logger.info("Starting in dev mode...", prefix=app.app_name)                                                                                           │
+│   251 │   │   │   env = self.get_environment(app, test_mode=test_mode)                                                                                                           │
+│ ❱ 252 │   │   │   return self.run_dev_app(                                                                                                                                       │
+│   253 │   │   │   │   app,                                                                                                                                                       │
+│   254 │   │   │   │   env,                                                                                                                                                       │
+│   255 │   │   │   │   test_mode=test_mode,                                                                                                                                       │
+│                                                                                                                                                                                  │
+│ ╭───────────────────────────────────────────────── locals ──────────────────────────────────────────────────╮                                                                    │
+│ │                 app = <com.example.smartcamapp v0.0.1 AppConfig>                                          │                                                                    │
+│ │             appname = None                                                                                │                                                                    │
+│ │      dist_info_path = WindowsPath('C:/Users/Joker/PycharmProjects/smartcamapp/src/smartcamapp.dist-info') │                                                                    │
+│ │                 env = {                                                                                   │                                                                    │
+│ │                       │   'PYTHONPATH': 'C:\\Users\\Joker\\PycharmProjects\\smartcamapp\\src',            │                                                                    │
+│ │                       │   'PYTHONMALLOC': 'default',                                                      │                                                                    │
+│ │                       │   'PYTHONUNBUFFERED': '1',                                                        │                                                                    │
+│ │                       │   'PYTHONDEVMODE': '1',                                                           │                                                                    │
+│ │                       │   'PYTHONUTF8': '1'                                                               │                                                                    │
+│ │                       }                                                                                   │                                                                    │
+│ │             options = {}                                                                                  │                                                                    │
+│ │         passthrough = []                                                                                  │                                                                    │
+│ │             run_app = True                                                                                │                                                                    │
+│ │                self = <briefcase.commands.dev.DevCommand object at 0x0000021439C816D0>                    │                                                                    │
+│ │           test_mode = False                                                                               │                                                                    │
+│ │ update_requirements = False                                                                               │                                                                    │
+│ ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────╯                                                                    │
+│                                                                                                                                                                                  │
+│ C:\Users\Joker\AppData\Local\Programs\Python\Python312\Lib\site-packages\briefcase\commands\dev.py:169 in run_dev_app                                                            │
+│                                                                                                                                                                                  │
+│   166 │   │   │   )                                                                                                                                                              │
+│   167 │   │   │                                                                                                                                                                  │
+│   168 │   │   │   # Start streaming logs for the app.                                                                                                                            │
+│ ❱ 169 │   │   │   self._stream_app_logs(                                                                                                                                         │
+│   170 │   │   │   │   app,                                                                                                                                                       │
+│   171 │   │   │   │   popen=app_popen,                                                                                                                                           │
+│   172 │   │   │   │   test_mode=test_mode,                                                                                                                                       │
+│                                                                                                                                                                                  │
+│ ╭──────────────────────────────────────────────── locals ─────────────────────────────────────────────────╮                                                                      │
+│ │         app = <com.example.smartcamapp v0.0.1 AppConfig>                                                │                                                                      │
+│ │   app_popen = <Popen: returncode: 1 args: ['C:\\Users\\Joker\\AppData\\Local\\Programs\\Py...>          │                                                                      │
+│ │     cmdline = [                                                                                         │                                                                      │
+│ │               │   'C:\\Users\\Joker\\AppData\\Local\\Programs\\Python\\Python312\\python.exe',          │                                                                      │
+│ │               │   '-c',                                                                                 │                                                                      │
+│ │               │   'import runpy, sys;sys.path.pop(0);sys.argv.extend([]);runpy.run_module("smartcam'+42 │                                                                      │
+│ │               ]                                                                                         │                                                                      │
+│ │         env = {                                                                                         │                                                                      │
+│ │               │   'PYTHONPATH': 'C:\\Users\\Joker\\PycharmProjects\\smartcamapp\\src',                  │                                                                      │
+│ │               │   'PYTHONMALLOC': 'default',                                                            │                                                                      │
+│ │               │   'PYTHONUNBUFFERED': '1',                                                              │                                                                      │
+│ │               │   'PYTHONDEVMODE': '1',                                                                 │                                                                      │
+│ │               │   'PYTHONUTF8': '1'                                                                     │                                                                      │
+│ │               }                                                                                         │                                                                      │
+│ │ main_module = 'smartcamapp'                                                                             │                                                                      │
+│ │     options = {}                                                                                        │                                                                      │
+│ │ passthrough = []                                                                                        │                                                                      │
+│ │        self = <briefcase.commands.dev.DevCommand object at 0x0000021439C816D0>                          │                                                                      │
+│ │   test_mode = False                                                                                     │                                                                      │
+│ ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────╯                                                                      │
+│                                                                                                                                                                                  │
+│ C:\Users\Joker\AppData\Local\Programs\Python\Python312\Lib\site-packages\briefcase\commands\run.py:202 in _stream_app_logs                                                       │
+│                                                                                                                                                                                  │
+│   199 │   │   │   │   # If we're monitoring an actual app (not just a log stream),                                                                                               │
+│   200 │   │   │   │   # and the app didn't exit cleanly, surface the error to the user.                                                                                          │
+│   201 │   │   │   │   if popen.poll() != 0:                                                                                                                                      │
+│ ❱ 202 │   │   │   │   │   raise BriefcaseCommandError(f"Problem running app {app.app_name}.")                                                                                    │
+│   203 │   │                                                                                                                                                                      │
+│   204 │   │   except KeyboardInterrupt:                                                                                                                                          │
+│   205 │   │   │   pass  # Catch CTRL-C to exit normally                                                                                                                          │
+│                                                                                                                                                                                  │
+│ ╭──────────────────────────────────────────── locals ─────────────────────────────────────────────╮                                                                              │
+│ │          app = <com.example.smartcamapp v0.0.1 AppConfig>                                       │                                                                              │
+│ │ clean_filter = None                                                                             │                                                                              │
+│ │ clean_output = False                                                                            │                                                                              │
+│ │   log_filter = <briefcase.commands.run.LogFilter object at 0x0000021439FD8260>                  │                                                                              │
+│ │   log_stream = False                                                                            │                                                                              │
+│ │        popen = <Popen: returncode: 1 args: ['C:\\Users\\Joker\\AppData\\Local\\Programs\\Py...> │                                                                              │
+│ │         self = <briefcase.commands.dev.DevCommand object at 0x0000021439C816D0>                 │                                                                              │
+│ │    test_mode = False                                                                            │                                                                              │
+│ ╰─────────────────────────────────────────────────────────────────────────────────────────────────╯                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+BriefcaseCommandError: Problem running app smartcamapp.

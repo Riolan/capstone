@@ -1,0 +1,11 @@
+Metadata-Version: 2.1
+Briefcase-Version: 0.3.20
+Name: smartcamapp
+Formal-Name: Smart Cam App
+App-ID: com.example.smartcamapp
+Version: 0.0.1
+Home-page: https://example.com/smartcamapp
+Download-URL: https://example.com/smartcamapp
+Author: STCgroup
+Author-email: stcgroup@example.com
+Summary: sd camera design app
