@@ -50,7 +50,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
 
-    implementation(libs.androidx.recyclerview) // Correct RecyclerView dependency
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.viewpager2) // Correct RecyclerView dependency
 
 
 

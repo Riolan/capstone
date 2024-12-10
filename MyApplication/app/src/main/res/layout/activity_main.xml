@@ -1,30 +1,153 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F0E9E9"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <ListView
-        android:id="@+id/listView"
+    <!-- ViewPager for displaying images or pages -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="163dp"
+        android:layout_weight="1"
+        android:background="#DCD9D9" />
+
+
+    <!-- Horizontal LinearLayout to hold ListView and TableLayout side by side -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
+        <!-- ListView for displaying a list of items -->
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" /> <!-- Equal weight for half the space -->
+
+        <!-- TableLayout for selecting animal types -->
+        <TableLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#00FFFFFF"
+            android:shrinkColumns="1"
+            android:stretchColumns="1">
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cat"
+                    android:textSize="16sp" />
+
+                <RadioButton
+                    android:id="@+id/radioCat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dog"
+                    android:textSize="16sp" />
+
+                <RadioButton
+                    android:id="@+id/radioDog"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Squirrel"
+                    android:textSize="16sp" />
+
+                <RadioButton
+                    android:id="@+id/radioSquirrel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bird"
+                    android:textSize="16sp" />
+
+                <RadioButton
+                    android:id="@+id/radioBird"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow>
+                <!-- Submit Button -->
+                <Button
+                    android:id="@+id/submitButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="Submit"
+                    android:textSize="16sp" />
+            </TableRow>
+
+        </TableLayout>
+
+    </LinearLayout>
+
+    <!-- Button to disconnect -->
     <Button
         android:id="@+id/disconnectButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Disconnect" />
 
+    <!-- EditText for message input, initially hidden -->
     <EditText
         android:id="@+id/messageBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Hi from app" />
+        android:hint="Hi from app"
+        android:visibility="gone"
+        tools:visibility="gone" />
 
+    <!-- Button to send the message, initially hidden -->
     <Button
         android:id="@+id/sendButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Send Message" />
+        android:text="Send Message"
+        android:visibility="gone"
+        tools:visibility="gone" />
+
+    <!-- Button to save data -->
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save" />
+
+    <!-- TextView for displaying data -->
+    <TextView
+        android:id="@+id/dataTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="No data received yet"
+        android:textSize="16sp" />
+
 </LinearLayout>
