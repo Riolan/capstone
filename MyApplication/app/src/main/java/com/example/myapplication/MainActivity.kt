@@ -150,6 +150,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var dataTextView: TextView // To display received data
 
+    private lateinit var radioCat: RadioButton
+    private lateinit var radioDog: RadioButton
+    private lateinit var radioSquirrel: RadioButton
+    private lateinit var radioBird: RadioButton
+    private lateinit var submitButton: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -160,6 +166,28 @@ class MainActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.viewPager)
         img_adapter = ImageAdapter(imageBitmaps, boundingBoxes)
         viewPager.adapter = img_adapter
+
+        // Initialize your RadioButtons and Submit Button
+        radioCat = findViewById(R.id.radioCat)
+        radioDog = findViewById(R.id.radioDog)
+        radioSquirrel = findViewById(R.id.radioSquirrel)
+        radioBird = findViewById(R.id.radioBird)
+        submitButton = findViewById(R.id.submitButton)
+
+        // Set OnClickListener for the submit button
+        submitButton.setOnClickListener {
+            // Get the selected animal status
+            val birdEnabled = radioBird.isChecked
+            val catEnabled = radioCat.isChecked
+            val dogEnabled = radioDog.isChecked
+            val squirrelEnabled = radioSquirrel.isChecked
+
+            // Assign a packet ID, for example, 1
+            val packetId: Byte = 0x20
+
+            // Call the function to send the animal status
+            sendAnimalStatus(packetId, birdEnabled, catEnabled, dogEnabled, squirrelEnabled)
+        }
 
         // Initialize Bluetooth adapter
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -193,6 +221,9 @@ class MainActivity : AppCompatActivity() {
 
         // Start scanning for devices
         startScan()
+
+
+
     }
 
     @SuppressLint("MissingPermission")
@@ -316,6 +347,35 @@ class MainActivity : AppCompatActivity() {
     }*/
 
 
+    fun cleanAndDecodeBase64(base64Data: String, width: Int, height: Int): ByteArray? {
+        // Base64 regex to identify valid characters (letters, numbers, +, /, and padding =)
+        val base64Regex = Regex("^[A-Za-z0-9+/=]+\$")
+
+        // Split the string into valid and invalid parts
+        val cleanedBase64 = StringBuilder()
+        base64Data.chunked(4).forEach { chunk ->
+            if (chunk.matches(base64Regex)) {
+                cleanedBase64.append(chunk)
+            } else {
+                // Replace invalid chunks with Base64 encoding of a black pixel
+                // Here, `blackPixel` is a placeholder for a small black JPEG image
+                val blackPixel = ByteArray(width * height * 3) { 0.toByte() } // A black RGB array
+                val encodedBlack = Base64.encodeToString(blackPixel, Base64.NO_WRAP)
+                cleanedBase64.append(encodedBlack)
+            }
+        }
+
+        return try {
+            // Decode the cleaned Base64 string
+            Base64.decode(cleanedBase64.toString(), Base64.DEFAULT)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+
+
     private var processingImage = false
     private var processingBoundingBox = false
 
@@ -342,7 +402,10 @@ class MainActivity : AppCompatActivity() {
                     Log.d("BLE", "End of image transmission.")
                     val completeBase64ImageData = receivedImageBuilder.toString()
                     val imageData = Base64.decode(completeBase64ImageData, Base64.DEFAULT)
-                    val bitmap: Bitmap? = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
+
+                    //val imageData = cleanAndDecodeBase64(completeBase64ImageData, 480, 480)
+                    val bitmap: Bitmap? =
+                        imageData?.let { BitmapFactory.decodeByteArray(imageData, 0, it.size) }
                     Log.d("BLE", "Length of received image is: ${completeBase64ImageData.length}")
 
                     if (bitmap != null) {
@@ -470,6 +533,73 @@ class MainActivity : AppCompatActivity() {
         gatt.writeDescriptor(descriptor)
 
         Log.i("BLE", "Notifications enabled for ${characteristic.uuid}")
+    }
+
+
+    // Function to send animal status with a packet ID via BLE
+    @SuppressLint("MissingPermission")
+    fun sendAnimalStatus(packetId: Byte, birdEnabled: Boolean, catEnabled: Boolean, dogEnabled: Boolean, squirrelEnabled: Boolean) {
+        if (!this::bluetoothGatt.isInitialized) {
+            Log.i("BLE", "Have not connected to a device yet... not sending.")
+            return
+
+        }
+
+        if (bluetoothGatt == null) {
+            Log.e("BLE", "BluetoothGatt is null. Cannot send animal status.")
+            return
+        }
+
+        // Discover services if not already done
+        val services = bluetoothGatt.services
+        if (services.isEmpty()) {
+            Log.e("BLE", "No services found. Ensure the connection is established.")
+            return
+        }
+
+        // Use the correct UUID for your service and characteristic
+        val characteristicUUID = UUID.fromString(CHARACTERISTIC_UUID) // Replace with your characteristic UUID
+        val serviceUUID = UUID.fromString(SERVICE_UUID) // Replace with your service UUID
+
+        // Get the service
+        val service = bluetoothGatt.getService(serviceUUID)
+        if (service == null) {
+            Log.e("BLE", "Service not found.")
+            return
+        }
+
+        // Get the characteristic
+        val characteristic = service.getCharacteristic(characteristicUUID)
+        if (characteristic == null) {
+            Log.e("BLE", "Characteristic not found.")
+            return
+        }
+
+        if (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE == 0) {
+            Log.e("BLE", "Characteristic does not have write property.")
+            return
+        }
+        // Create a byte array to hold the packet ID and statuses
+        val animalStatus = ByteArray(5) // 1 byte for packet ID + 4 bytes for animal statuses
+
+        // Set the packet ID (you can choose an appropriate value for your use case)
+        animalStatus[0] = packetId // Set the packet ID
+
+        // Convert Boolean values to byte values (1 for true, 0 for false)
+        animalStatus[1] = if (birdEnabled) 1 else 0 // bBird
+        animalStatus[2] = if (catEnabled) 1 else 0  // bCat
+        animalStatus[3] = if (dogEnabled) 1 else 0  // bDog
+        animalStatus[4] = if (squirrelEnabled) 1 else 0 // bSquirrel
+
+        var hello : String = "hello"
+        characteristic.setValue(hello);
+        val success = bluetoothGatt.writeCharacteristic(characteristic) // Send the data
+
+        if (success) {
+            Log.d("BLE", "Animal status sent successfully with packet ID $packetId")
+        } else {
+            Log.e("BLE", "Failed to send animal status")
+        }
     }
 
     private fun checkAndRequestPermissions() {
