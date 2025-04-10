@@ -737,7 +737,7 @@ static void dp_app_cv_yolov8n_ob_eventhdl_cb(EVT_INDEX_E event)
 
 		cisdp_get_jpginfo(&jpeg_sz, &jpeg_addr);
 
-#if FRAME_CHECK_DEBUG
+		#if FRAME_CHECK_DEBUG
 			if(g_spi_master_initial_status == 0) {
 				if(hx_drv_spi_mst_open_speed(SPI_SEN_PIC_CLK) != 0)
 				{
@@ -766,48 +766,53 @@ static void dp_app_cv_yolov8n_ob_eventhdl_cb(EVT_INDEX_E event)
 					dbg_printf(DBG_LESS_INFO, "write frame result %d, data size=%d,addr=0x%x\n",read_status,
 							jpeg_sz,jpeg_addr);
 			#endif
-#endif
-#ifdef EN_ALGO
-#ifdef UART_SEND_ALOGO_RESEULT
-
-	hx_drv_swreg_aon_get_appused1(&judge_case_data);
-	g_trans_type = (judge_case_data>>16);
-	if( g_trans_type == 0 )// transfer type is (UART) 
-	{
-		cv_yolov8n_ob_run(&algoresult_yolov8n_ob);
-	}
-	else if( g_trans_type == 1 || g_trans_type == 2)// transfer type is (SPI) or (UART & SPI) 
-	{
-		#if TOTAL_STEP_TICK
-				uint32_t systick_1, systick_2;
-				uint32_t loop_cnt_1, loop_cnt_2;
-				SystemGetTick(&systick_1, &loop_cnt_1);
 		#endif
+
+	#ifdef EN_ALGO
+	#ifdef UART_SEND_ALOGO_RESEULT
+
+		hx_drv_swreg_aon_get_appused1(&judge_case_data);
+		g_trans_type = (judge_case_data>>16);
+		if( g_trans_type == 0 )// transfer type is (UART) 
+		{
 			cv_yolov8n_ob_run(&algoresult_yolov8n_ob);
+		}
+		else if( g_trans_type == 1 || g_trans_type == 2)// transfer type is (SPI) or (UART & SPI) 
+		{
+			#if TOTAL_STEP_TICK
+					uint32_t systick_1, systick_2;
+					uint32_t loop_cnt_1, loop_cnt_2;
+					SystemGetTick(&systick_1, &loop_cnt_1);
+			#endif
+				cv_yolov8n_ob_run(&algoresult_yolov8n_ob);
 
-		#if TOTAL_STEP_TICK						
-				SystemGetTick(&systick_2, &loop_cnt_2);
-			#if TOTAL_STEP_TICK_DBG_LOG
-				xprintf("Tick for TOTAL YOLOV8N OB:[%d]\r\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));					
-			#endif	
+			#if TOTAL_STEP_TICK						
+					SystemGetTick(&systick_2, &loop_cnt_2);
+				#if TOTAL_STEP_TICK_DBG_LOG
+					xprintf("Tick for TOTAL YOLOV8N OB:[%d]\r\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));					
+				#endif	
 
-			if(g_trans_type == 1)//USE SPI
-			{
-				algoresult_yolov8n_ob.algo_tick = (loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2);		
-			} 		
-		#endif
+				if(g_trans_type == 1)//USE SPI
+				{
+					algoresult_yolov8n_ob.algo_tick = (loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2);		
+				} 		
+			#endif
 
-		#if FRAME_CHECK_DEBUG
-			hx_drv_spi_mst_protocol_write_sp((uint32_t)&algoresult_yolov8n_ob, sizeof(struct_yolov8_ob_algoResult), DATA_TYPE_META_YOLOV8_OB_DATA);
-		#endif
-	}
-#else 
+			#if FRAME_CHECK_DEBUG
+				hx_drv_spi_mst_protocol_write_sp((uint32_t)&algoresult_yolov8n_ob, sizeof(struct_yolov8_ob_algoResult), DATA_TYPE_META_YOLOV8_OB_DATA);
+			#endif
+		}
+	#else 
 	#if TOTAL_STEP_TICK
 			uint32_t systick_1, systick_2;
 			uint32_t loop_cnt_1, loop_cnt_2;
 			SystemGetTick(&systick_1, &loop_cnt_1);
 	#endif
 
+			/**
+			 *  Look Here
+			 *  Run is called here.
+			 */
 			cv_yolov8n_ob_run(&algoresult_yolov8n_ob);
 	#if TOTAL_STEP_TICK						
 			SystemGetTick(&systick_2, &loop_cnt_2);
@@ -888,6 +893,7 @@ void app_start_state(APP_STATE_E state)
 #else
 	if(state == APP_STATE_ALLON_YOLOV8N_OB)
 	{
+		//if(cisdp_dp_init(true, SENSORDPLIB_PATH_INT_INP_HW5X5_JPEG, dp_app_cv_yolo11n_ob_eventhdl_cb, 4, APP_DP_RES_RGB640x480_INP_SUBSAMPLE_2X) < 0)
 		if(cisdp_dp_init(true, SENSORDPLIB_PATH_INT_INP_HW5X5_JPEG, dp_app_cv_yolov8n_ob_eventhdl_cb, 4, APP_DP_RES_RGB640x480_INP_SUBSAMPLE_2X) < 0)
         {
         	xprintf("\r\nDATAPATH Init fail\r\n");

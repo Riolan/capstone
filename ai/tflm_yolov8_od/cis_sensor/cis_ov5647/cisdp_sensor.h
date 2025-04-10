@@ -29,9 +29,12 @@ extern "C" {
  */
 typedef enum CISDP_INIT_TYPE_S
 {
-	CISDP_INIT_TYPE_NONE			= 0x00,
-	CISDP_INIT_TYPE_VIDEO_STREAM	= 0x01,			/*For CPU usage*/
-	CISDP_INIT_TYPE_AOS				= 0x02,			/*For PMU USAGE*/
+	CISDP_INIT_TYPE_INP_CROP_496x368_JPG   	= 0x00,
+	CISDP_INIT_TYPE_INP_CROP_1280x960_RAW,
+	CISDP_INIT_TYPE_INP_CROP_1280x960_CH_BINNING_2X_JPG,
+	CISDP_INIT_TYPE_INP_CROP_992x736_CH_BINNING_2X_JPG,
+	CISDP_INIT_TYPE_INP_CROP_1008x752_Q_BINNING_2X_RAW,
+	CISDP_INIT_TYPE_INP_CROP_1008x752_Q_BINNING_4X_RAW,
 } CISDP_INIT_TYPE_E;
 
 int cisdp_sensor_init();
@@ -47,6 +50,26 @@ uint32_t app_get_raw_sz();
 uint32_t app_get_raw_width();
 uint32_t app_get_raw_height();
 uint32_t app_get_raw_channels();
+uint32_t app_mem_to_hw5x5_jpg(uint32_t raw_addr, uint32_t jpg_addr, uint32_t raw_w, uint32_t raw_h);
+uint32_t app_mem_to_jpg(uint32_t yuv_addr, uint32_t jpg_addr, uint32_t w, uint32_t h);
+uint32_t copy_mem_to_mem(uint32_t src_addr, uint32_t dst_addr, uint32_t src_w, uint32_t src_h, uint32_t start_x, uint32_t start_y, uint32_t len_x, uint32_t len_y);
+
+uint32_t cisdp_get_wdma1_sram_addr();
+uint32_t cisdp_get_wdma2_sram_addr();
+uint32_t cisdp_get_wdma3_sram_addr();
+uint32_t cisdp_get_jpegautofill_sram_addr();
+uint32_t cisdp_get_raw_addr();
+uint32_t cisdp_get_yuv_addr();
+uint32_t cisdp_get_quater_raw_addr();
+uint32_t cisdp_get_raw_width();
+uint32_t cisdp_get_raw_height();
+uint8_t  cisdp_get_hw5x5_jpeg_flag();
+uint8_t  cisdp_get_hw5x5_flag();
+
+// ADDED
+uint32_t cisdp_get_raw_buff_320_320();
+uint32_t cisdp_get_raw_buff_320_320_rgb();
+
 
 #ifdef __cplusplus
 }

@@ -30,7 +30,7 @@
 #include "img_proc_helium.h"
 #include "yolo_postprocessing.h"
 
-
+#include "sahi.hpp"
 #include "xprintf.h"
 #include "spi_master_protocol.h"
 #include "cisdp_cfg.h"
@@ -42,7 +42,15 @@
 
 #define INPUT_IMAGE_CHANNELS 3
 
-#if 1
+#define YOLOV8_OB_INPUT_TENSOR_WIDTH   320
+#define YOLOV8_OB_INPUT_TENSOR_HEIGHT  320
+#define YOLOV8_OB_INPUT_TENSOR_CHANNEL INPUT_IMAGE_CHANNELS
+
+// ####
+// The decided upon value was 320x320
+
+
+/*#if 1
 #define YOLOV8_OB_INPUT_TENSOR_WIDTH   192
 #define YOLOV8_OB_INPUT_TENSOR_HEIGHT  192
 #define YOLOV8_OB_INPUT_TENSOR_CHANNEL INPUT_IMAGE_CHANNELS
@@ -51,6 +59,8 @@
 #define YOLOV8_OB_INPUT_TENSOR_HEIGHT  224
 #define YOLOV8_OB_INPUT_TENSOR_CHANNEL INPUT_IMAGE_CHANNELS
 #endif
+*/
+
 
 #define YOLOV8N_OB_DBG_APP_LOG 0
 
@@ -87,12 +97,8 @@ TfLiteTensor *yolov8n_ob_input, *yolov8n_ob_output, *yolov8n_ob_output2;
 };
 
 #if YOLOV8N_OB_DBG_APP_LOG
-std::string coco_classes[] = {"person","bicycle","car","motorcycle","airplane","bus","train","truck","boat","traffic light","fire hydrant","stop sign","parking meter","bench","bird","cat","dog","horse","sheep","cow","elephant","bear","zebra","giraffe","backpack","umbrella","handbag","tie","suitcase","frisbee","skis","snowboard","sports ball","kite","baseball bat","baseball glove","skateboard","surfboard","tennis racket","bottle","wine glass","cup","fork","knife","spoon","bowl","banana","apple","sandwich","orange","broccoli","carrot","hot dog","pizza","donut","cake","chair","couch","potted plant","bed","dining table","toilet","tv","laptop","mouse","remote","keyboard","cell phone","microwave","oven","toaster","sink","refrigerator","book","clock","vase","scissors","teddy bear","hair drier","toothbrush"};
-int coco_ids[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28, 31,
-                      32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,
-                      57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 70, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 84, 85,
-                      86, 87, 88, 89, 90};
-
+std::string coco_classes[] = {"dog", "cat", "bird", "squirrel"};
+int coco_ids[] = {1, 2, 3, 4};
 #endif
 
 static void _arm_npu_irq_handler(void)
@@ -207,13 +213,17 @@ int cv_yolov8n_ob_init(bool security_enable, bool privilege_enable, uint32_t mod
 }
 
 
-
+#ifndef DETECTION_CLS_YOLOV8
 typedef struct detection_cls_yolov8{
     box bbox;
     float confidence;
     float index;
 
 } detection_cls_yolov8;
+#define DETECTION_CLS_YOLOV8 1
+#endif 
+
+
 
 static bool yolov8_det_comparator(detection_cls_yolov8 &pa, detection_cls_yolov8 &pb)
 {
@@ -261,8 +271,11 @@ static void  yolov8_NMSBoxes(std::vector<box> &boxes,std::vector<float> &confide
 #if CHANGE_YOLOV8_OB_OUPUT_SHAPE
 static void yolov8_ob_post_processing(tflite::MicroInterpreter* static_interpreter,float modelScoreThreshold, float modelNMSThreshold, struct_yolov8_ob_algoResult *alg,	std::forward_list<el_box_t> &el_algo)
 {
-	uint32_t img_w = app_get_raw_width();
-    uint32_t img_h = app_get_raw_height();
+
+	// We are able to fill the entire buffer of the image into sram. 
+	// We might potentially run into issues with how the model is loaded and conflict with it.
+	uint32_t img_w = 1280; //;app_get_raw_width();
+    uint32_t img_h = 960;//app_get_raw_height();
 	TfLiteTensor* output = static_interpreter->output(0);
 	TfLiteTensor* output_2 = static_interpreter->output(1);
 	// init postprocessing 	
@@ -537,15 +550,18 @@ int cv_yolov8n_ob_run(struct_yolov8_ob_algoResult *algoresult_yolov8n_ob) {
 	int ercode = 0;
     float w_scale;
     float h_scale;
-    uint32_t img_w = app_get_raw_width();
-    uint32_t img_h = app_get_raw_height();
-    uint32_t ch = app_get_raw_channels();
-    uint32_t raw_addr = app_get_raw_addr();
+    //uint32_t img_w = app_get_raw_width();
+    //uint32_t img_h = app_get_raw_height();
+    //uint32_t ch = app_get_raw_channels();
+    //uint32_t raw_addr = app_get_raw_addr();
     uint32_t expand = 0;
 	std::forward_list<el_box_t> el_algo;
 
+	#define IMAGE_WIDTH 320
+	#define IMAGE_HEIGHT 320
+
 	#if YOLOV8N_OB_DBG_APP_LOG
-    xprintf("raw info: w[%d] h[%d] ch[%d] addr[%x]\n",img_w, img_h, ch, raw_addr);
+    //xprintf("raw info: w[%d] h[%d] ch[%d] addr[%x]\n",img_w, img_h, ch, raw_addr);
 	#endif
 
     if(yolov8n_ob_int_ptr!= nullptr) {
@@ -556,75 +572,157 @@ int cv_yolov8n_ob_run(struct_yolov8_ob_algoResult *algoresult_yolov8n_ob) {
 			SystemGetTick(&systick_1, &loop_cnt_1);
 		#endif
     	//get image from sensor and resize
-		w_scale = (float)(img_w - 1) / (YOLOV8_OB_INPUT_TENSOR_WIDTH - 1);
-		h_scale = (float)(img_h - 1) / (YOLOV8_OB_INPUT_TENSOR_HEIGHT - 1);
-
-		
-		hx_lib_image_resize_BGR8U3C_to_RGB24_helium((uint8_t*)raw_addr, (uint8_t*)yolov8n_ob_input->data.data,  
+		/*hx_lib_image_resize_BGR8U3C_to_RGB24_helium((uint8_t*)raw_addr, (uint8_t*)yolov8n_ob_input->data.data,  
 		                    img_w, img_h, ch, 
-                        	YOLOV8_OB_INPUT_TENSOR_WIDTH, YOLOV8_OB_INPUT_TENSOR_HEIGHT, w_scale,h_scale);
-		#ifdef EACH_STEP_TICK						
+                        	YOLOV8_OB_INPUT_TENSOR_WIDTH, YOLOV8_OB_INPUT_TENSOR_HEIGHT, w_scale,h_scale);*/
+
+
+		std::vector<std::vector<detection_cls_yolov8>> all_detections;
+		// Create slices
+		auto slices = SAHI::create_slices(
+			cisdp_get_raw_width(), cisdp_get_raw_height(), 
+			320, 320, 
+			0.2
+		);
+
+
+		// Temporary RGB buffer for a slice (This shouldn't cause memory issues but need to be careful)
+		//uint8_t* slice_rgb_buffer = (uint8_t*)malloc(320 * 320 * 3);
+
+
+		for (const auto& slice : slices) {
+			// Extract slice 
+			// Note: Actual image slicing depends on your image representation
+			// This is a placeholder - you'll need to implement based on your image format
+			// Since we are using SAHI, we don't need to resize here
+			// we should resize for a final pass over the entire image but
+			// regarding SAHI, it is unnecessary.
+			// 
+
+			// Allocate buffer for a slice from the BGR raw image
+			// Essentially, we are copying from the raw image to the slice buffer
+			// uint8_t* slice_bgr_buffer = (uint8_t*)malloc(320 * 320 * 3);
+			// Replaced above with: cisdp_get_raw_buff_320_320()
+			// Extract slice from raw full image into BGR buffer
+			copy_mem_to_mem(
+				cisdp_get_raw_addr(),
+				cisdp_get_raw_buff_320_320(), // this is bgr buffer
+				320, 320,
+				slice.x, slice.y,
+				slice.width, slice.height
+			);
+			
+			// We should still convert RGB24
+			// to RGB8U3C for the model input
+			// We need to convert the image to RGB format if it is not already in that format
+
+			// get the entire image and turn it into RGB24_helium format
+			// was originally  (uint8_t*)yolo11n_ob_input->data.data
+			// but we need to copy the entire raw image and convert it to RGB24_helium format
+			// so we are copying via slice instead.
+
+			// Convert BGR to RGB
+			hx_lib_image_resize_BGR8U3C_to_RGB24_helium(
+				(uint8_t*)cisdp_get_raw_buff_320_320(), // this is bgr buffer
+				(uint8_t*)cisdp_get_raw_buff_320_320_rgb(), // this is rgb buffer
+				slice.width, slice.height, 3,
+				320, 320,
+				(float)(slice.width - 1) / (320 - 1),  // these should be 1.0
+				(float)(slice.height - 1) / (320 - 1) // these should be 1.0
+			);
+			
+			#ifdef EACH_STEP_TICK						
+				SystemGetTick(&systick_2, &loop_cnt_2);
+				dbg_printf(DBG_LESS_INFO,"Tick for resize image BGR8U3C_to_RGB24_helium for yolo OB:[%d]\r\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));							
+			#endif
+
+			// Run inference on slice
+			// TODO: 
+			/*auto slice_detections = model_runner.run_inference(
+				slice_image.data(), 
+				config.slice_width, 
+				config.slice_height
+			);*/
+
+			// TODO: Confirm - but this should begin the inference process
+			#ifdef EACH_STEP_TICK						
 			SystemGetTick(&systick_2, &loop_cnt_2);
 			dbg_printf(DBG_LESS_INFO,"Tick for resize image BGR8U3C_to_RGB24_helium for yolov8 OB:[%d]\r\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));							
-		#endif
-
-		#ifdef EACH_STEP_TICK
-			SystemGetTick(&systick_1, &loop_cnt_1);
-		#endif
-
-		// //uint8 to int8
-		for (int i = 0; i < yolov8n_ob_input->bytes; ++i) {
-			*((int8_t *)yolov8n_ob_input->data.data+i) = *((int8_t *)yolov8n_ob_input->data.data+i) - 128;
-    	}
-
-		#ifdef EACH_STEP_TICK
-		SystemGetTick(&systick_2, &loop_cnt_2);
-		dbg_printf(DBG_LESS_INFO,"Tick for Invoke for uint8toint8 for YOLOV8_OB:[%d]\r\n\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));    
-		#endif	
-
-		#ifdef EACH_STEP_TICK
-		SystemGetTick(&systick_1, &loop_cnt_1);
-		#endif
-		TfLiteStatus invoke_status = yolov8n_ob_int_ptr->Invoke();
-
-		#ifdef EACH_STEP_TICK
-		SystemGetTick(&systick_2, &loop_cnt_2);
-		#endif
-		if(invoke_status != kTfLiteOk)
-		{
-			xprintf("yolov8 object detect invoke fail\n");
-			return -1;
-		}
-		else
-		{
-			#if YOLOV8N_OB_DBG_APP_LOG
-			xprintf("yolov8 object detect  invoke pass\n");
 			#endif
-		}
-		#ifdef EACH_STEP_TICK
-    		dbg_printf(DBG_LESS_INFO,"Tick for Invoke for YOLOV8_OB:[%d]\r\n\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));    
-		#endif
 
-		#ifdef EACH_STEP_TICK
+			#ifdef EACH_STEP_TICK
+				SystemGetTick(&systick_1, &loop_cnt_1);
+			#endif
+
+			// //uint8 to int8
+			for (int i = 0; i < yolov8n_ob_input->bytes; ++i) {
+				*((int8_t *)yolov8n_ob_input->data.data+i) = *((int8_t *)yolov8n_ob_input->data.data+i) - 128;
+			}
+
+			#ifdef EACH_STEP_TICK
+			SystemGetTick(&systick_2, &loop_cnt_2);
+			dbg_printf(DBG_LESS_INFO,"Tick for Invoke for uint8toint8 for YOLOV8_OB:[%d]\r\n\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));    
+			#endif	
+
+			#ifdef EACH_STEP_TICK
 			SystemGetTick(&systick_1, &loop_cnt_1);
-		#endif
-		//retrieve output data
-		yolov8_ob_post_processing(yolov8n_ob_int_ptr,0.25, 0.45, algoresult_yolov8n_ob,el_algo);
-		#ifdef EACH_STEP_TICK
+			#endif
+			TfLiteStatus invoke_status = yolov8n_ob_int_ptr->Invoke();
+
+			#ifdef EACH_STEP_TICK
 			SystemGetTick(&systick_2, &loop_cnt_2);
-			dbg_printf(DBG_LESS_INFO,"Tick for Invoke for YOLOV8_OB_post_processing:[%d]\r\n\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));    
-		#endif
-		#if YOLOV8N_OB_DBG_APP_LOG
-			xprintf("yolov8_ob_post_processing done\r\n");
-		#endif
-		#ifdef TOTAL_STEP_TICK						
-			SystemGetTick(&systick_2, &loop_cnt_2);
-			// dbg_printf(DBG_LESS_INFO,"Tick for TOTAL YOLOV8 OB:[%d]\r\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));		
-		#endif
+			#endif
+			if(invoke_status != kTfLiteOk)
+			{
+				xprintf("yolov8 object detect invoke fail\n");
+				return -1;
+			}
+			else
+			{
+				#if YOLOV8N_OB_DBG_APP_LOG
+				xprintf("yolov8 object detect  invoke pass\n");
+				#endif
+			}
+			#ifdef EACH_STEP_TICK
+				dbg_printf(DBG_LESS_INFO,"Tick for Invoke for YOLOV8_OB:[%d]\r\n\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));    
+			#endif
+
+			#ifdef EACH_STEP_TICK
+				SystemGetTick(&systick_1, &loop_cnt_1);
+			#endif
+			//retrieve output data
+			yolov8_ob_post_processing(yolov8n_ob_int_ptr, 0.25, 0.45, algoresult_yolov8n_ob,el_algo);
+			#ifdef EACH_STEP_TICK
+				SystemGetTick(&systick_2, &loop_cnt_2);
+				dbg_printf(DBG_LESS_INFO,"Tick for Invoke for YOLOV8_OB_post_processing:[%d]\r\n\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));    
+			#endif
+			#if YOLOV8N_OB_DBG_APP_LOG
+				xprintf("yolov8_ob_post_processing done\r\n");
+			#endif
+			#ifdef TOTAL_STEP_TICK						
+				SystemGetTick(&systick_2, &loop_cnt_2);
+				// dbg_printf(DBG_LESS_INFO,"Tick for TOTAL YOLOV8 OB:[%d]\r\n",(loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2));		
+			#endif
+
+
+			auto detections = SAHI::convert_to_detections(*algoresult_yolov8n_ob);
+
+			// Map coordinates to original image
+			SAHI::map_slice_coordinates(detections, slice, 320, 320);
+			
+			// TODO: Do something with this.
+			all_detections.push_back(detections);
+		}
+
+
+		
+		
+
+		
 
     }
 	
-
+/* TODO: Fix
 #ifdef UART_SEND_ALOGO_RESEULT
 	algoresult_yolov8n_ob->algo_tick = (loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2) + capture_image_tick;
 uint32_t judge_case_data;
@@ -658,6 +756,7 @@ if( g_trans_type == 0 || g_trans_type == 2)// transfer type is (UART) or (UART &
 	
 	SystemGetTick(&systick_2, &loop_cnt_2);
 	capture_image_tick = (loop_cnt_2-loop_cnt_1)*CPU_CLK+(systick_1-systick_2);	
+	*/
 	return ercode;
 }
 
