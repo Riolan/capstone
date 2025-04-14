@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "315436420604",
+    "project_id": "stc-image-manager",
+    "storage_bucket": "stc-image-manager.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:315436420604:android:2e8d1f496a395b016b7679",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCf-gRW5eeS_G1NCvnfSGVamfA_RzgYUYg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
