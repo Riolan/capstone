@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="20dp"
+    android:background="#98D4FF">
 
     <EditText
         android:id="@+id/editTextEmail"
@@ -22,7 +23,8 @@
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login" />
+        android:text="Login"
+        android:background="#E0F2FF"/>
 
     <Button
         android:id="@+id/signupButton"
@@ -31,5 +33,6 @@
         android:text="Sign Up"
         android:layout_marginTop="20dp"
         android:layout_gravity="center"
-        android:onClick="goToSignUp"/>
+        android:onClick="goToSignUp"
+        android:background="#42B0FD"/>
 </LinearLayout>

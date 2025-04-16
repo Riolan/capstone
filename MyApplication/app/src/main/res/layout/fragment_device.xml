@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#98D4FF">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#E0F2FF">
+
+        <TextView
+            android:id="@+id/deviceNameTextView"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:text="Select Animals:"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:textColor="#000000"
+            />
+
+        <Switch
+            android:id="@+id/switchCat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cat" />
+
+        <Switch
+            android:id="@+id/switchDog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Dog" />
+
+        <Switch
+            android:id="@+id/switchBird"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Bird" />
+
+        <Switch
+            android:id="@+id/switchSquirrel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Squirrel" />
+
+    </LinearLayout>
+</ScrollView>

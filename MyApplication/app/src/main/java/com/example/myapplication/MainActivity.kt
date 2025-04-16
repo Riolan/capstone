@@ -124,6 +124,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bluetoothGatt: BluetoothGatt
     private lateinit var characteristic: BluetoothGattCharacteristic
 
+    private lateinit var deviceList: ArrayList<String>
+
     // Data for image and bounding box transmission
     private val imageBitmaps = mutableListOf<Bitmap>()
     private val boundingBoxes = mutableListOf<List<BoundingBox>>()
@@ -137,11 +139,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
     private lateinit var img_adapter: ImageAdapter
     private lateinit var dataTextView: TextView
-    private lateinit var radioCat: RadioButton
-    private lateinit var radioDog: RadioButton
-    private lateinit var radioSquirrel: RadioButton
-    private lateinit var radioBird: RadioButton
+    private lateinit var switchCat: Switch
+    private lateinit var switchDog: Switch
+    private lateinit var switchSquirrel: Switch
+    private lateinit var switchBird: Switch
     private lateinit var submitButton: Button
+    private lateinit var cameraButton: Button
     private lateinit var sharedPreferences: SharedPreferences
 
     // Database helper
@@ -179,19 +182,30 @@ class MainActivity : AppCompatActivity() {
         viewPager.adapter = img_adapter
 
         // RadioButtons and Submit Button
-        radioCat = findViewById(R.id.radioCat)
-        radioDog = findViewById(R.id.radioDog)
-        radioSquirrel = findViewById(R.id.radioSquirrel)
-        radioBird = findViewById(R.id.radioBird)
+        switchCat = findViewById(R.id.switchCat)
+        switchDog = findViewById(R.id.switchDog)
+        switchSquirrel = findViewById(R.id.switchSquirrel)
+        switchBird = findViewById(R.id.switchBird)
         submitButton = findViewById(R.id.submitButton)
+        cameraButton = findViewById(R.id.cameraButton)
         submitButton.setOnClickListener {
-            val birdEnabled = radioBird.isChecked
-            val catEnabled = radioCat.isChecked
-            val dogEnabled = radioDog.isChecked
-            val squirrelEnabled = radioSquirrel.isChecked
+            val birdEnabled = switchBird.isChecked
+            val catEnabled = switchCat.isChecked
+            val dogEnabled = switchDog.isChecked
+            val squirrelEnabled = switchSquirrel.isChecked
             val packetId: Byte = 0x20 // Example packet ID
             sendAnimalStatus(packetId, birdEnabled, catEnabled, dogEnabled, squirrelEnabled)
         }
+
+        cameraButton.setOnClickListener {
+            val deviceList = convertDevicesToStringList(devices)
+            deviceList.add("Test")
+            val intent = Intent(this, CameraActivity::class.java)
+            intent.putStringArrayListExtra("device_list", deviceList)
+            startActivity(intent)
+        }
+
+
 
         // UPDATED: Use BluetoothManager to get the adapter
         val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
@@ -211,6 +225,11 @@ class MainActivity : AppCompatActivity() {
         listView.setOnItemClickListener { _, _, position, _ ->
             val device = devices[position]
             connectToDevice(device)
+            val deviceList = convertDevicesToStringList(devices)
+            deviceList.add("Test")
+            val intent = Intent(this, CameraActivity::class.java)
+            intent.putStringArrayListExtra("device_list", deviceList)
+            startActivity(intent)
         }
 
         val disconnectButton: Button = findViewById(R.id.disconnectButton)
@@ -225,6 +244,17 @@ class MainActivity : AppCompatActivity() {
         editor.apply()
         startActivity(Intent(this, LoginActivity::class.java))
         finish()
+    }
+    @SuppressLint("MissingPermission")
+    fun convertDevicesToStringList(devices: MutableList<BluetoothDevice>): ArrayList<String> {
+        val deviceStrings = ArrayList<String>()
+        for (device in devices) {
+            // You can choose how to represent each device, for example:
+            // "${device.name} - ${device.address}"
+            val deviceInfo = "${device.name ?: "Unknown Device"} - ${device.address}"
+            deviceStrings.add(deviceInfo)
+        }
+        return deviceStrings
     }
 
     @SuppressLint("MissingPermission")
@@ -465,10 +495,10 @@ class MainActivity : AppCompatActivity() {
      */
     private fun getSelectedAnimal(): String {
         return when {
-            radioCat.isChecked -> "Cat"
-            radioDog.isChecked -> "Dog"
-            radioSquirrel.isChecked -> "Squirrel"
-            radioBird.isChecked -> "Bird"
+            switchCat.isChecked -> "Cat"
+            switchDog.isChecked -> "Dog"
+            switchSquirrel.isChecked -> "Squirrel"
+            switchBird.isChecked -> "Bird"
             else -> "Unknown"
         }
     }

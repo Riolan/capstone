@@ -2,33 +2,56 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#98d4ff"
     android:orientation="vertical"
     android:padding="20dp">
+
+    <ImageView
+        android:layout_width="114dp"
+        android:layout_height="114dp"
+        android:src="@drawable/uah_blue" />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="112dp"
+        android:elegantTextHeight="true"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:text="Smart Trail Camera"
+        android:textColor="#000000"
+        android:textSize="40sp" />
+
 
     <EditText
         android:id="@+id/editTextEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Email" />
+        android:hint="Enter Email"
+        android:textColor="#000000" />
 
     <EditText
         android:id="@+id/editTextPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter Password"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:textColor="#000000" />
 
     <Button
         android:id="@+id/registerButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sign Up" />
+        android:background="#E0F2FF"
+        android:text="Sign Up"
+        android:textColor="#000000" />
 
     <Button
         android:id="@+id/backToLoginButton"
-        android:layout_width="wrap_content"
+        android:layout_width="114dp"
         android:layout_height="wrap_content"
-        android:text="Back to Login"
         android:layout_gravity="center"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:background="#42B0FD"
+        android:text="Back to Login"
+        android:textColor="#000000" />
+
 </LinearLayout>

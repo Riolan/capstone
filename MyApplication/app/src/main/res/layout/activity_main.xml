@@ -5,24 +5,16 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F0E9E9"
+    android:background="#98D4FF"
     android:padding="16dp"
     tools:context=".MainActivity">
-
-    <!-- Toolbar at the top -->
-<!--    <androidx.appcompat.widget.Toolbar-->
-<!--        android:id="@+id/toolbar"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="?attr/actionBarSize"-->
-<!--        android:background="?attr/colorPrimary"-->
-<!--        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"-->
-<!--        android:popupTheme="@style/ThemeOverlay.AppCompat.Light" />-->
 
     <!-- Logout button below toolbar -->
     <Button
         android:id="@+id/logoutButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:backgroundTint="#1FA6FF"
         android:text="Logout" />
 
     <!-- ViewPager for displaying images or pages.
@@ -32,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#DCD9D9" />
+        android:background="#E0F2FF" />
 
     <!-- Horizontal layout that holds ListView (for devices) and TableLayout (for radio buttons).
          Also set this to 0dp height and weight=1 so it shares space with the ViewPager. -->
@@ -45,9 +37,10 @@
         <!-- ListView for displaying discovered devices -->
         <ListView
             android:id="@+id/listView"
-            android:layout_width="0dp"
+            android:layout_width="150dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:visibility="gone"
+            tools:visibility="gone"/>
 
         <!-- TableLayout for selecting animal types -->
         <TableLayout
@@ -56,17 +49,19 @@
             android:layout_weight="1"
             android:shrinkColumns="1"
             android:stretchColumns="1"
-            android:background="#00FFFFFF">
+            android:background="#98D4FF">
 
             <TableRow>
                 <TextView
                     android:layout_width="wrap_content"
+                    android:paddingEnd="10dp"
                     android:layout_height="wrap_content"
                     android:text="Cat"
-                    android:textSize="16sp" />
+                    android:textColor="#000000"
+                    android:textSize="25sp" />
 
-                <RadioButton
-                    android:id="@+id/radioCat"
+                <Switch
+                    android:id="@+id/switchCat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </TableRow>
@@ -76,10 +71,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Dog"
-                    android:textSize="16sp" />
+                    android:textColor="#000000"
+                    android:paddingEnd="10dp"
+                    android:textSize="25sp" />
 
-                <RadioButton
-                    android:id="@+id/radioDog"
+                <Switch
+                    android:id="@+id/switchDog"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </TableRow>
@@ -89,10 +86,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Squirrel"
-                    android:textSize="16sp" />
+                    android:textColor="#000000"
+                    android:paddingEnd="20dp"
+                    android:textSize="25sp" />
 
-                <RadioButton
-                    android:id="@+id/radioSquirrel"
+                <Switch
+                    android:id="@+id/switchSquirrel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </TableRow>
@@ -102,33 +101,60 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Bird"
-                    android:textSize="16sp" />
+                    android:textColor="#000000"
+                    android:textSize="25sp"
+                    android:paddingEnd="10dp"/>
 
-                <RadioButton
-                    android:id="@+id/radioBird"
+                <Switch
+                    android:id="@+id/switchBird"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </TableRow>
 
-            <TableRow>
+
                 <!-- Submit Button -->
                 <Button
                     android:id="@+id/submitButton"
-                    android:layout_width="wrap_content"
+                    android:layout_width="141dp"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
                     android:text="Submit"
-                    android:textSize="16sp" />
-            </TableRow>
+                    android:textSize="16sp"
+                    android:background="#E0F2FF"/>
+
         </TableLayout>
     </LinearLayout>
+
+    <!-- Button to save data -->
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:background="#E0F2FF"/>
 
     <!-- Button to disconnect -->
     <Button
         android:id="@+id/disconnectButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Disconnect" />
+        android:text="Disconnect"
+        android:backgroundTint="#1FA6FF"/>
+
+    <!-- Button to send the message, initially hidden -->
+    <Button
+        android:id="@+id/sendButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send Message"
+        android:background="#E0F2FF"
+        android:visibility="gone"
+        tools:visibility="gone" />
+    <Button
+        android:id="@+id/cameraButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Camera Settings"
+        android:background="#E0F2FF" />
 
     <!-- EditText for message input, initially hidden -->
     <EditText
@@ -139,23 +165,8 @@
         android:visibility="gone"
         tools:visibility="gone" />
 
-    <!-- Button to send the message, initially hidden -->
-    <Button
-        android:id="@+id/sendButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Send Message"
-        android:visibility="gone"
-        tools:visibility="gone" />
 
-    <!-- Button to save data -->
-    <Button
-        android:id="@+id/saveButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save" />
-
-    <!-- TextView for displaying data -->
+ <!-- TextView for displaying data -->
     <TextView
         android:id="@+id/dataTextView"
         android:layout_width="match_parent"
