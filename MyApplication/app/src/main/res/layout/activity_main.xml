@@ -10,6 +10,9 @@
     tools:context=".MainActivity">
 
     <!-- Logout button below toolbar -->
+
+    <!-- ViewPager for displaying images or pages.
+         Set height to 0dp and weight=1 so it shares space with the next layout. -->
     <Button
         android:id="@+id/logoutButton"
         android:layout_width="wrap_content"
@@ -17,130 +20,36 @@
         android:backgroundTint="#1FA6FF"
         android:text="Logout" />
 
-    <!-- ViewPager for displaying images or pages.
-         Set height to 0dp and weight=1 so it shares space with the next layout. -->
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPager"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#E0F2FF" />
+        android:layout_height="300dp"
+        android:orientation="vertical">
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#E0F2FF">
+
+        </androidx.viewpager2.widget.ViewPager2>
+    </LinearLayout>
 
     <!-- Horizontal layout that holds ListView (for devices) and TableLayout (for radio buttons).
          Also set this to 0dp height and weight=1 so it shares space with the ViewPager. -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-
-        <!-- ListView for displaying discovered devices -->
-        <ListView
-            android:id="@+id/listView"
-            android:layout_width="150dp"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            tools:visibility="gone"/>
-
-        <!-- TableLayout for selecting animal types -->
-        <TableLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:shrinkColumns="1"
-            android:stretchColumns="1"
-            android:background="#98D4FF">
-
-            <TableRow>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:paddingEnd="10dp"
-                    android:layout_height="wrap_content"
-                    android:text="Cat"
-                    android:textColor="#000000"
-                    android:textSize="25sp" />
-
-                <Switch
-                    android:id="@+id/switchCat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </TableRow>
-
-            <TableRow>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Dog"
-                    android:textColor="#000000"
-                    android:paddingEnd="10dp"
-                    android:textSize="25sp" />
-
-                <Switch
-                    android:id="@+id/switchDog"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </TableRow>
-
-            <TableRow>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Squirrel"
-                    android:textColor="#000000"
-                    android:paddingEnd="20dp"
-                    android:textSize="25sp" />
-
-                <Switch
-                    android:id="@+id/switchSquirrel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </TableRow>
-
-            <TableRow>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Bird"
-                    android:textColor="#000000"
-                    android:textSize="25sp"
-                    android:paddingEnd="10dp"/>
-
-                <Switch
-                    android:id="@+id/switchBird"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </TableRow>
-
-
-                <!-- Submit Button -->
-                <Button
-                    android:id="@+id/submitButton"
-                    android:layout_width="141dp"
-                    android:layout_height="wrap_content"
-                    android:text="Submit"
-                    android:textSize="16sp"
-                    android:background="#E0F2FF"/>
-
-        </TableLayout>
-    </LinearLayout>
 
     <!-- Button to save data -->
-    <Button
-        android:id="@+id/saveButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save"
-        android:background="#E0F2FF"/>
 
     <!-- Button to disconnect -->
-    <Button
-        android:id="@+id/disconnectButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Disconnect"
-        android:backgroundTint="#1FA6FF"/>
 
     <!-- Button to send the message, initially hidden -->
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="266dp"
+        android:layout_height="48dp"
+        android:visibility="visible"
+        tools:visibility="visible" />
+
     <Button
         android:id="@+id/sendButton"
         android:layout_width="match_parent"
@@ -149,12 +58,6 @@
         android:background="#E0F2FF"
         android:visibility="gone"
         tools:visibility="gone" />
-    <Button
-        android:id="@+id/cameraButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Camera Settings"
-        android:background="#E0F2FF" />
 
     <!-- EditText for message input, initially hidden -->
     <EditText
@@ -170,9 +73,56 @@
     <TextView
         android:id="@+id/dataTextView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:padding="16dp"
         android:text="No data received yet"
         android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="192dp"
+            android:layout_height="wrap_content"
+            android:background="#E0F2FF"
+            android:text="Save" />
+
+        <Button
+            android:id="@+id/cameraButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#E0F2FF"
+            android:text="Camera Settings" />
+
+    </LinearLayout>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <TextView
+                android:id="@+id/connectedText"
+                android:layout_width="197dp"
+                android:layout_height="32dp"
+                android:text="Not Connected"
+                android:visibility="visible"
+                tools:visibility="visible" />
+
+            <Button
+                android:id="@+id/disconnectButton"
+                android:layout_width="match_parent"
+                android:layout_height="65dp"
+                android:backgroundTint="#1FA6FF"
+                android:text="Disconnect" />
+        </TableRow>
+
+    </TableLayout>
 
 </LinearLayout>

@@ -136,14 +136,17 @@ class MainActivity : AppCompatActivity() {
     private var currentImagePosition = -1
 
     // UI Elements
+    private lateinit var isConnectedText :TextView
+    private lateinit var isConnectedButton: Button
+
     private lateinit var viewPager: ViewPager2
     private lateinit var img_adapter: ImageAdapter
     private lateinit var dataTextView: TextView
-    private lateinit var switchCat: Switch
-    private lateinit var switchDog: Switch
-    private lateinit var switchSquirrel: Switch
-    private lateinit var switchBird: Switch
-    private lateinit var submitButton: Button
+    //private lateinit var switchCat: Switch
+    //private lateinit var switchDog: Switch
+    //private lateinit var switchSquirrel: Switch
+    //private lateinit var switchBird: Switch
+    //private lateinit var submitButton: Button
     private lateinit var cameraButton: Button
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -176,26 +179,35 @@ class MainActivity : AppCompatActivity() {
         val logoutButton = findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener { logoutUser() }
 
+        isConnectedText = findViewById(R.id.connectedText)
+        isConnectedButton = findViewById(R.id.disconnectButton)
+        isConnectedButton.setEnabled(false) // default to set disconnected
+        isConnectedButton.setClickable(false)
+
+
         dataTextView = findViewById(R.id.dataTextView)
         viewPager = findViewById(R.id.viewPager)
         img_adapter = ImageAdapter(imageBitmaps, boundingBoxes)
         viewPager.adapter = img_adapter
 
         // RadioButtons and Submit Button
-        switchCat = findViewById(R.id.switchCat)
-        switchDog = findViewById(R.id.switchDog)
-        switchSquirrel = findViewById(R.id.switchSquirrel)
-        switchBird = findViewById(R.id.switchBird)
-        submitButton = findViewById(R.id.submitButton)
+        //switchCat = findViewById(R.id.switchCat)
+        //switchDog = findViewById(R.id.switchDog)
+        //switchSquirrel = findViewById(R.id.switchSquirrel)
+        //switchBird = findViewById(R.id.switchBird)
+
+        // Used to used to update settings for solo view
+        //submitButton = findViewById(R.id.submitButton)
+
         cameraButton = findViewById(R.id.cameraButton)
-        submitButton.setOnClickListener {
-            val birdEnabled = switchBird.isChecked
-            val catEnabled = switchCat.isChecked
-            val dogEnabled = switchDog.isChecked
-            val squirrelEnabled = switchSquirrel.isChecked
-            val packetId: Byte = 0x20 // Example packet ID
-            sendAnimalStatus(packetId, birdEnabled, catEnabled, dogEnabled, squirrelEnabled)
-        }
+        //submitButton.setOnClickListener {
+        //    val birdEnabled = switchBird.isChecked
+        //    val catEnabled = switchCat.isChecked
+        //    val dogEnabled = switchDog.isChecked
+        //    val squirrelEnabled = switchSquirrel.isChecked
+        //    val packetId: Byte = 0x20 // Example packet ID
+        //    sendAnimalStatus(packetId, birdEnabled, catEnabled, dogEnabled, squirrelEnabled)
+        //}
 
         cameraButton.setOnClickListener {
             val deviceList = convertDevicesToStringList(devices)
@@ -220,16 +232,23 @@ class MainActivity : AppCompatActivity() {
 
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
         val listView: ListView = findViewById(R.id.listView)
+
+
+
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, mutableListOf())
         listView.adapter = adapter
         listView.setOnItemClickListener { _, _, position, _ ->
             val device = devices[position]
             connectToDevice(device)
             val deviceList = convertDevicesToStringList(devices)
-            deviceList.add("Test")
-            val intent = Intent(this, CameraActivity::class.java)
-            intent.putStringArrayListExtra("device_list", deviceList)
-            startActivity(intent)
+
+            // Add if needed for testing.
+            //deviceList.add("Test")
+
+            /// TODO: Testing
+            //val intent = Intent(this, CameraActivity::class.java)
+            //intent.putStringArrayListExtra("device_list", deviceList)
+            //startActivity(intent)
         }
 
         val disconnectButton: Button = findViewById(R.id.disconnectButton)
@@ -249,10 +268,16 @@ class MainActivity : AppCompatActivity() {
     fun convertDevicesToStringList(devices: MutableList<BluetoothDevice>): ArrayList<String> {
         val deviceStrings = ArrayList<String>()
         for (device in devices) {
-            // You can choose how to represent each device, for example:
-            // "${device.name} - ${device.address}"
-            val deviceInfo = "${device.name ?: "Unknown Device"} - ${device.address}"
-            deviceStrings.add(deviceInfo)
+            // If the device does not contain ESP32 in it then
+            // we go to the next and do not display it
+            if (!device.name.contains("ESP32")) {
+                continue;
+            } else {
+                // You can choose how to represent each device, for example:
+                // "${device.name} - ${device.address}"
+                val deviceInfo = "${device.name ?: "Unknown Device"} - ${device.address}"
+                deviceStrings.add(deviceInfo)
+            }
         }
         return deviceStrings
     }
@@ -281,10 +306,15 @@ class MainActivity : AppCompatActivity() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val device = result.device
             if (!devices.contains(device)) {
-                devices.add(device)
-                adapter.add("${device.name ?: "Unknown Device"}\n${device.address}")
-                adapter.notifyDataSetChanged()
-            }
+                // If the device does not contain ESP32 in it then
+                // we go to the next and do not display it
+                // TODO:
+                    if (device.name != null && device.name.contains("ESP32")) {
+                        devices.add(device)
+                        adapter.add("${device.name ?: "Unknown Device"}\n${device.address}")
+                        adapter.notifyDataSetChanged()
+                    }
+                }
         }
     }
 
@@ -297,6 +327,11 @@ class MainActivity : AppCompatActivity() {
             device.connectGatt(this, false, gattCallback)
         }
         Toast.makeText(this, "Connecting to ${device.name}", Toast.LENGTH_SHORT).show()
+        // TODO: Update button and text to show where connected to.
+        isConnectedText.setText("Connected to: ${device.name}")
+        isConnectedButton.setEnabled(true)
+        isConnectedButton.setClickable(true)
+
     }
 
     @SuppressLint("MissingPermission")
@@ -304,8 +339,13 @@ class MainActivity : AppCompatActivity() {
         if (::bluetoothGatt.isInitialized) {
             bluetoothGatt.disconnect()
             bluetoothGatt.close()
+            // TODO: Disconnect (add button)
             Log.i("BLE", "Disconnected from device.")
             Toast.makeText(this, "Disconnected from device.", Toast.LENGTH_SHORT).show()
+            isConnectedText.setText("Not Connected")
+            isConnectedButton.setEnabled(false)
+            isConnectedButton.setClickable(false)
+
         } else {
             Log.w("BLE", "BluetoothGatt is not initialized.")
             Toast.makeText(this, "No device to disconnect from.", Toast.LENGTH_SHORT).show()
@@ -495,10 +535,10 @@ class MainActivity : AppCompatActivity() {
      */
     private fun getSelectedAnimal(): String {
         return when {
-            switchCat.isChecked -> "Cat"
-            switchDog.isChecked -> "Dog"
-            switchSquirrel.isChecked -> "Squirrel"
-            switchBird.isChecked -> "Bird"
+            //switchCat.isChecked -> "Cat"
+            //switchDog.isChecked -> "Dog"
+            //switchSquirrel.isChecked -> "Squirrel"
+            //switchBird.isChecked -> "Bird"
             else -> "Unknown"
         }
     }
