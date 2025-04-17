@@ -2,31 +2,30 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="#98D4FF">
+    android:background="#F6F6F6"
+    android:padding="16dp">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#E0F2FF">
+        android:background="#D6E1ED"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/deviceNameTextView"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <TextView
-            android:text="Select Animals:"
-            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
+            android:text="Select Animals:"
             android:textColor="#000000"
-            />
+            android:textStyle="bold" />
 
         <Switch
             android:id="@+id/switchCat"

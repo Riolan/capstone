@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#98D4FF"
+    android:orientation="vertical"
     android:padding="16dp"
     tools:context=".MainActivity">
 
@@ -13,22 +12,49 @@
 
     <!-- ViewPager for displaying images or pages.
          Set height to 0dp and weight=1 so it shares space with the next layout. -->
-    <Button
-        android:id="@+id/logoutButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#1FA6FF"
-        android:text="Logout" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:orientation="vertical">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="76dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/logoutButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#1FA6FF"
+                android:text="Logout" />
+
+            <TableRow
+                android:layout_width="293dp"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/connectedText"
+                    android:layout_width="179dp"
+                    android:layout_height="32dp"
+                    android:text="Not Connected"
+                    android:visibility="visible"
+                    tools:visibility="visible" />
+
+                <Button
+                    android:id="@+id/disconnectButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#1FA6FF"
+                    android:text="Disconnect" />
+            </TableRow>
+        </LinearLayout>
+
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="260dp"
             android:layout_weight="1"
             android:background="#E0F2FF">
 
@@ -43,19 +69,13 @@
     <!-- Button to disconnect -->
 
     <!-- Button to send the message, initially hidden -->
-    <ListView
-        android:id="@+id/listView"
-        android:layout_width="266dp"
-        android:layout_height="48dp"
-        android:visibility="visible"
-        tools:visibility="visible" />
 
     <Button
         android:id="@+id/sendButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Send Message"
         android:background="#E0F2FF"
+        android:text="Send Message"
         android:visibility="gone"
         tools:visibility="gone" />
 
@@ -69,7 +89,14 @@
         tools:visibility="gone" />
 
 
- <!-- TextView for displaying data -->
+    <!-- TextView for displaying data -->
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="266dp"
+        android:layout_height="48dp"
+        android:visibility="visible"
+        tools:visibility="visible" />
+
     <TextView
         android:id="@+id/dataTextView"
         android:layout_width="match_parent"
@@ -99,30 +126,27 @@
 
     </LinearLayout>
 
-    <TableLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+        <Button
+            android:id="@+id/sendBleButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Send" />
 
-            <TextView
-                android:id="@+id/connectedText"
-                android:layout_width="197dp"
-                android:layout_height="32dp"
-                android:text="Not Connected"
-                android:visibility="visible"
-                tools:visibility="visible" />
+        <EditText
+            android:id="@+id/sendBleData"
+            android:layout_width="wrap_content"
+            android:layout_height="176dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:gravity="start|top"
+            android:inputType="textMultiLine" />
 
-            <Button
-                android:id="@+id/disconnectButton"
-                android:layout_width="match_parent"
-                android:layout_height="65dp"
-                android:backgroundTint="#1FA6FF"
-                android:text="Disconnect" />
-        </TableRow>
-
-    </TableLayout>
+    </LinearLayout>
 
 </LinearLayout>

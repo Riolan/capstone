@@ -7,7 +7,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 
 class DevicePagerAdapter(
     fa: FragmentActivity,
-    private val deviceList: List<String>
+    private var deviceList: MutableList<String>
 ) : FragmentStateAdapter(fa) {
     private val fragmentMap = mutableMapOf<Int, DeviceFragment>()
     override fun getItemCount(): Int = deviceList.size
@@ -20,5 +20,12 @@ class DevicePagerAdapter(
         fragmentMap[position] = fragment
         return fragment
     }
+
+    fun updateDevices(newDeviceList: MutableList<String>) {
+        deviceList = newDeviceList
+        fragmentMap.clear() // Clear fragment cache
+        notifyDataSetChanged() // This will recreate fragments
+    }
+
     fun getFragment(position: Int): DeviceFragment? = fragmentMap[position]
 }

@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:gravity="center"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:padding="8dp"
-    android:background="#98D4FF">
+    android:background="#F8F8F8"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:padding="8dp">
 
     <TextView
         android:id="@+id/tabTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Device"
-        android:textSize="16sp"
+        android:layout_width="152dp"
+        android:layout_height="53dp"
+        android:background="#D7E3EF"
         android:paddingEnd="8dp"
-        android:background="#E0F2FF"/>
+        android:text="Device"
+        android:textSize="16sp" />
 
     <ImageButton
         android:id="@+id/renameButton"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_menu_edit"
         android:contentDescription="Rename"
-        android:scaleType="fitCenter"
         android:padding="2dp"
-        />
+        android:scaleType="fitCenter"
+        android:src="@android:drawable/ic_menu_edit" />
 </LinearLayout>

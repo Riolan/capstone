@@ -1,35 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-android:orientation="vertical"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-    android:background="#98D4FF">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#98D4FF"
+    android:orientation="vertical">
+
     <Button
         android:id="@+id/backButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Back"
         android:layout_margin="8dp"
-        android:background="#E0F2FF"/>
+        android:background="#E0F2FF"
+        android:text="Back" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="135dp">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="101dp"
+            android:layout_gravity="center">
+
+            <TextView
+                android:id="@+id/motherNodeTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:editable="false"
+                android:gravity="center"
+                android:text="TextView" />
+        </HorizontalScrollView>
+
+    </androidx.cardview.widget.CardView>
+
     <Button
         android:id="@+id/resetAnimalsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Reset Animals"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="8dp"
-        android:background="#42B0FD"/>
+        android:background="#42B0FD"
+        android:text="Reset Animals" />
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
+        android:layout_height="111dp"
         app:tabMode="scrollable" />
 
-<androidx.viewpager2.widget.ViewPager2
-    android:id="@+id/viewPager"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"/>
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 </LinearLayout>

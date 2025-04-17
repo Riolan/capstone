@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F8F8F8"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#98d4ff">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/editTextText"
@@ -12,17 +12,16 @@
         android:layout_height="wrap_content"
         android:clickable="false"
         android:cursorVisible="false"
+        android:elegantTextHeight="true"
+        android:gravity="center"
         android:inputType="text"
         android:textColor="#000000"
-        android:textSize="35sp"
-        android:gravity="center"
-        android:elegantTextHeight="true"
-        />
+        android:textSize="35sp" />
 
     <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -34,25 +33,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="cat"
-                android:textSize="25sp"/>
+                android:textSize="25sp" />
 
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="dog"
-                android:textSize="25sp"/>
+                android:textSize="25sp" />
 
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="squirrel"
-                android:textSize="25sp"/>
-				
-			<Switch
+                android:textSize="25sp" />
+
+            <Switch
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="bird"
-                android:textSize="25sp"/>
+                android:textSize="25sp" />
         </LinearLayout>
     </ScrollView>
 
@@ -60,6 +59,6 @@
         android:id="@+id/saveButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save"
-        android:background="#E0F2FF"/>
+        android:background="#E0F2FF"
+        android:text="Save" />
 </LinearLayout>

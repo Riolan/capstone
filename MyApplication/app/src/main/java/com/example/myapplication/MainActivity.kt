@@ -36,6 +36,8 @@ import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.myapplication.ui.BleManager
+
 data class BoundingBox(
     val x: Int,
     val y: Int,
@@ -139,6 +141,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var isConnectedText :TextView
     private lateinit var isConnectedButton: Button
 
+    private lateinit var sendBleData : EditText
+    private lateinit var sendBleButton : Button
+
     private lateinit var viewPager: ViewPager2
     private lateinit var img_adapter: ImageAdapter
     private lateinit var dataTextView: TextView
@@ -211,7 +216,7 @@ class MainActivity : AppCompatActivity() {
 
         cameraButton.setOnClickListener {
             val deviceList = convertDevicesToStringList(devices)
-            deviceList.add("Test")
+            //deviceList.add("Test")
             val intent = Intent(this, CameraActivity::class.java)
             intent.putStringArrayListExtra("device_list", deviceList)
             startActivity(intent)
@@ -254,6 +259,22 @@ class MainActivity : AppCompatActivity() {
         val disconnectButton: Button = findViewById(R.id.disconnectButton)
         disconnectButton.setOnClickListener { disconnectFromDevice() }
 
+
+
+        sendBleData = findViewById<EditText>(R.id.sendBleData)
+        sendBleButton  = findViewById<Button>(R.id.sendBleButton)
+        sendBleButton.setOnClickListener {
+            val inputText = sendBleData.text.toString()
+            // Do something with inputText
+            Log.d("MyApp", "User typed: $inputText")
+            sendAnimalStatus(0x20, true, true, true, true)
+        }
+
+        //BleManager.getInstance().setGatt(bluetoothGatt)
+        //BleManager.getInstance().setCharacteristic(characteristic)
+        BleManager.getInstance().setConnected(false)
+
+
         startScan()
     }
 
@@ -282,6 +303,7 @@ class MainActivity : AppCompatActivity() {
         return deviceStrings
     }
 
+    // TODO: Scan only once add a button to refresh?
     @SuppressLint("MissingPermission")
     private fun startScan() {
         // For Android 12+, ensure BLUETOOTH_SCAN permission is granted
@@ -313,6 +335,8 @@ class MainActivity : AppCompatActivity() {
                         devices.add(device)
                         adapter.add("${device.name ?: "Unknown Device"}\n${device.address}")
                         adapter.notifyDataSetChanged()
+
+                        BleManager.getInstance().addDevice(device)
                     }
                 }
         }
@@ -331,8 +355,15 @@ class MainActivity : AppCompatActivity() {
         isConnectedText.setText("Connected to: ${device.name}")
         isConnectedButton.setEnabled(true)
         isConnectedButton.setClickable(true)
+        BleManager.getInstance().setConnected(true)
+
+        BleManager.getInstance().setCurrentDevice(device)
+        BleManager.getInstance().setGatt(bluetoothGatt)
 
     }
+
+    // TODO: This might be dumb haha
+    val activity = this  // inside MainActivity
 
     @SuppressLint("MissingPermission")
     private fun disconnectFromDevice() {
@@ -345,6 +376,7 @@ class MainActivity : AppCompatActivity() {
             isConnectedText.setText("Not Connected")
             isConnectedButton.setEnabled(false)
             isConnectedButton.setClickable(false)
+            BleManager.getInstance().setConnected(false)
 
         } else {
             Log.w("BLE", "BluetoothGatt is not initialized.")
@@ -363,6 +395,12 @@ class MainActivity : AppCompatActivity() {
                 gatt.discoverServices()
             } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                 Log.i("BLE", "Disconnected from device.")
+                Toast.makeText(activity, "Disconnected from device.", Toast.LENGTH_SHORT).show()
+                isConnectedText.setText("Not Connected")
+                isConnectedButton.setEnabled(false)
+                isConnectedButton.setClickable(false)
+                BleManager.getInstance().setConnected(false)
+
             }
         }
 

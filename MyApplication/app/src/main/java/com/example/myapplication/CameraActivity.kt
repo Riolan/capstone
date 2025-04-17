@@ -1,5 +1,6 @@
 
 package com.example.myapplication
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -18,10 +19,14 @@ import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.databinding.ActivityCameraSettingsBinding
+import com.example.myapplication.ui.BleConnectionListener
 import com.example.myapplication.ui.main.SectionsPagerAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+
+import com.example.myapplication.ui.BleManager
+import android.bluetooth.BluetoothDevice
 
 class MyPagerAdapter(fragmentActivity: FragmentActivity, private val items: List<String>) : FragmentStateAdapter(fragmentActivity) {
     override fun getItemCount(): Int = items.size
@@ -46,7 +51,7 @@ class MyFragment : Fragment() {
 }
 
 
-class CameraActivity : AppCompatActivity() {
+class CameraActivity : AppCompatActivity(), BleConnectionListener {
 
     private lateinit var binding: ActivityCameraSettingsBinding
     private lateinit var CameraText: TextView
@@ -56,10 +61,12 @@ class CameraActivity : AppCompatActivity() {
     private var deviceList: MutableList<String> = mutableListOf()
     private lateinit var prefs: SharedPreferences
     private lateinit var originalList: ArrayList<String>
+    private lateinit var bleManager: BleManager
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_camera_settings)
+        setContentView(R.layout.test_device_viewer)
 
         val resetButton = findViewById<Button>(R.id.resetAnimalsButton)
         resetButton.setOnClickListener {
@@ -86,10 +93,11 @@ class CameraActivity : AppCompatActivity() {
 
         originalList = intent.getStringArrayListExtra("device_list") ?: arrayListOf()
 
-        deviceList = originalList.mapIndexed { index, name ->
-            prefs.getString("device_$index", name) ?: name
-        }.toMutableList()
-        deviceList.add("Test")
+
+        bleManager = BleManager.getInstance()
+        bleManager.registerConnectionListener(this)
+
+        //deviceList.add("Test")
         adapter = DevicePagerAdapter(this, deviceList)
         viewPager.adapter = adapter
 
@@ -97,6 +105,8 @@ class CameraActivity : AppCompatActivity() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.customView = createCustomTabView(position)
         }.attach()
+
+        updateConnectedDevicesUI()
     }
     private fun createCustomTabView(position: Int): View {
         val view = layoutInflater.inflate(R.layout.custom_tab, null)
@@ -110,6 +120,61 @@ class CameraActivity : AppCompatActivity() {
         }
 
         return view
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Unregister the connection listener to prevent memory leaks
+        bleManager.unregisterConnectionListener(this)
+    }
+
+    // Implement BleConnectionListener interface methods
+    override fun onDeviceConnected(device: BluetoothDevice) {
+        // Update UI when a device connects
+        runOnUiThread {
+            updateConnectedDevicesUI()
+        }
+    }
+
+    override fun onDeviceDisconnected(device: BluetoothDevice) {
+        // Update UI when a device disconnects
+        runOnUiThread {
+            updateConnectedDevicesUI()
+        }
+    }
+
+    // This method updates the UI to show only connected devices
+    @SuppressLint("MissingPermission")
+    private fun updateConnectedDevicesUI() {
+        // Get the current connected device
+        val currentDevice = bleManager.getCurrentDevice()
+
+        // Create a list with just the current device or a placeholder message
+        deviceList = if (currentDevice != null) {
+            // Get the device name - adjust this based on your device object structure
+            val deviceName = currentDevice.name ?: "Unknown Device"
+            mutableListOf(deviceName)
+
+        } else {
+            mutableListOf("No Connected Device")
+        }
+
+        if (currentDevice != null) {
+            // This will instead need to host Edge Nodes
+
+            // Check if adapter is already initialized
+            if (::adapter.isInitialized) {
+                adapter.updateDevices(deviceList)
+            } else {
+                adapter = DevicePagerAdapter(this, deviceList)
+                viewPager.adapter = adapter
+
+                TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+                    tab.customView = createCustomTabView(position)
+                }.attach()
+            }
+        }
     }
 
     private fun showRenameDialog(position: Int) {
