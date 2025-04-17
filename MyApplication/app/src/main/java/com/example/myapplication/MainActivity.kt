@@ -31,6 +31,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.example.myapplication.ui.BleDataListener
 import com.google.firebase.auth.FirebaseAuth
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
@@ -116,17 +117,13 @@ class ImageAdapter(
     }
 }
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), BleDataListener {
 
     // Bluetooth-related variables
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
     private val devices: MutableList<BluetoothDevice> = mutableListOf()
     private lateinit var adapter: ArrayAdapter<String>
-    private lateinit var bluetoothGatt: BluetoothGatt
-    private lateinit var characteristic: BluetoothGattCharacteristic
-
-    private lateinit var deviceList: ArrayList<String>
 
     // Data for image and bounding box transmission
     private val imageBitmaps = mutableListOf<Bitmap>()
@@ -147,20 +144,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
     private lateinit var img_adapter: ImageAdapter
     private lateinit var dataTextView: TextView
-    //private lateinit var switchCat: Switch
-    //private lateinit var switchDog: Switch
-    //private lateinit var switchSquirrel: Switch
-    //private lateinit var switchBird: Switch
-    //private lateinit var submitButton: Button
+
     private lateinit var cameraButton: Button
     private lateinit var sharedPreferences: SharedPreferences
 
     // Database helper
     private lateinit var dbHelper: DatabaseHelper
 
-    // UUIDs for BLE Service and Characteristic
+    /*// UUIDs for BLE Service and Characteristic
     private val SERVICE_UUID = "12345678-1234-1234-1234-123456789012"
-    private val CHARACTERISTIC_UUID = "87654321-4321-4321-4321-210987654321"
+    private val CHARACTERISTIC_UUID = "87654321-4321-4321-4321-210987654321"*/
 
     private val PERMISSION_REQUEST_CODE = 100
 
@@ -195,24 +188,7 @@ class MainActivity : AppCompatActivity() {
         img_adapter = ImageAdapter(imageBitmaps, boundingBoxes)
         viewPager.adapter = img_adapter
 
-        // RadioButtons and Submit Button
-        //switchCat = findViewById(R.id.switchCat)
-        //switchDog = findViewById(R.id.switchDog)
-        //switchSquirrel = findViewById(R.id.switchSquirrel)
-        //switchBird = findViewById(R.id.switchBird)
-
-        // Used to used to update settings for solo view
-        //submitButton = findViewById(R.id.submitButton)
-
         cameraButton = findViewById(R.id.cameraButton)
-        //submitButton.setOnClickListener {
-        //    val birdEnabled = switchBird.isChecked
-        //    val catEnabled = switchCat.isChecked
-        //    val dogEnabled = switchDog.isChecked
-        //    val squirrelEnabled = switchSquirrel.isChecked
-        //    val packetId: Byte = 0x20 // Example packet ID
-        //    sendAnimalStatus(packetId, birdEnabled, catEnabled, dogEnabled, squirrelEnabled)
-        //}
 
         cameraButton.setOnClickListener {
             val deviceList = convertDevicesToStringList(devices)
@@ -270,13 +246,19 @@ class MainActivity : AppCompatActivity() {
             sendAnimalStatus(0x20, true, true, true, true)
         }
 
-        //BleManager.getInstance().setGatt(bluetoothGatt)
-        //BleManager.getInstance().setCharacteristic(characteristic)
         BleManager.getInstance().setConnected(false)
+
+        BleManager.getInstance().registerDataListener(this)
 
 
         startScan()
     }
+
+
+    override fun onBleDataReceived(data: ByteArray) {
+        receiveData(data);
+    }
+
 
     private fun logoutUser() {
         val editor = sharedPreferences.edit()
@@ -345,11 +327,11 @@ class MainActivity : AppCompatActivity() {
     // UPDATED: Use newer connectGatt signature on API 23+ with transport parameter
     @SuppressLint("MissingPermission")
     private fun connectToDevice(device: BluetoothDevice) {
-        bluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            device.connectGatt(this, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
-        } else {
-            device.connectGatt(this, false, gattCallback)
-        }
+
+        val gatt = device.connectGatt(this, false, BleManager.getInstance().gattCallback)
+        BleManager.getInstance().setGatt(gatt)
+        BleManager.getInstance().setCurrentDevice(device)
+
         Toast.makeText(this, "Connecting to ${device.name}", Toast.LENGTH_SHORT).show()
         // TODO: Update button and text to show where connected to.
         isConnectedText.setText("Connected to: ${device.name}")
@@ -357,83 +339,26 @@ class MainActivity : AppCompatActivity() {
         isConnectedButton.setClickable(true)
         BleManager.getInstance().setConnected(true)
 
-        BleManager.getInstance().setCurrentDevice(device)
-        BleManager.getInstance().setGatt(bluetoothGatt)
-
     }
 
     // TODO: This might be dumb haha
     val activity = this  // inside MainActivity
 
-    @SuppressLint("MissingPermission")
     private fun disconnectFromDevice() {
-        if (::bluetoothGatt.isInitialized) {
-            bluetoothGatt.disconnect()
-            bluetoothGatt.close()
-            // TODO: Disconnect (add button)
-            Log.i("BLE", "Disconnected from device.")
-            Toast.makeText(this, "Disconnected from device.", Toast.LENGTH_SHORT).show()
-            isConnectedText.setText("Not Connected")
-            isConnectedButton.setEnabled(false)
-            isConnectedButton.setClickable(false)
-            BleManager.getInstance().setConnected(false)
+        BleManager.getInstance().disconnect()
 
-        } else {
-            Log.w("BLE", "BluetoothGatt is not initialized.")
-            Toast.makeText(this, "No device to disconnect from.", Toast.LENGTH_SHORT).show()
-        }
+        Toast.makeText(this, "Disconnected from device.", Toast.LENGTH_SHORT).show()
+        Log.i("BLE", "Disconnected from device.")
+
+        isConnectedText.text = "Not Connected"
+        isConnectedButton.isEnabled = false
+        isConnectedButton.isClickable = false
     }
 
-    private val gattCallback = object : BluetoothGattCallback() {
-        @SuppressLint("MissingPermission")
-        override fun onConnectionStateChange(
-            gatt: BluetoothGatt,
-            status: Int,
-            newState: Int
-        ) {
-            if (newState == BluetoothGatt.STATE_CONNECTED) {
-                gatt.discoverServices()
-            } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-                Log.i("BLE", "Disconnected from device.")
-                Toast.makeText(activity, "Disconnected from device.", Toast.LENGTH_SHORT).show()
-                isConnectedText.setText("Not Connected")
-                isConnectedButton.setEnabled(false)
-                isConnectedButton.setClickable(false)
-                BleManager.getInstance().setConnected(false)
 
-            }
-        }
 
-        override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                val service = gatt.getService(UUID.fromString(SERVICE_UUID))
-                if (service != null) {
-                    characteristic =
-                        service.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID))
-                    if (characteristic != null) {
-                        enableNotifications(gatt, characteristic)
-                    } else {
-                        Log.e("BLE", "Characteristic not found.")
-                    }
-                } else {
-                    Log.e("BLE", "Service not found.")
-                }
-            }
-        }
-
-        override fun onCharacteristicChanged(
-            gatt: BluetoothGatt,
-            characteristic: BluetoothGattCharacteristic
-        ) {
-            val value = characteristic.value?.let { String(it) } ?: "Unknown"
-            Log.i("BLE", "Received Data: $value")
-            // Process the incoming data
-            receiveData(characteristic.value)
-            runOnUiThread {
-                dataTextView.text = "Received: $value"
-            }
-        }
-    }
+    private fun ByteArray.startsWith(marker: ByteArray): Boolean =
+        this.size >= marker.size && this.copyOfRange(0, marker.size).contentEquals(marker)
 
     /**
      * Processes incoming BLE data, handling image and bounding box transmissions.
@@ -443,25 +368,27 @@ class MainActivity : AppCompatActivity() {
         val hexData = data.joinToString(" ") { "%02X".format(it) }
         Log.d("BLE", "Raw Received Bytes: $hexData")
 
-        // Define markers for image and bounding box data
-        val startBboxBytes = "START_BBOX;".toByteArray(Charsets.UTF_8)
-        val endBboxBytes = "END_BBOX;".toByteArray(Charsets.UTF_8)
-        val startImageBytes = "START;".toByteArray(Charsets.UTF_8)
-        val endImageBytes = "END;".toByteArray(Charsets.UTF_8)
+        // Marker constants
+        val START_IMAGE = "START;".toByteArray(Charsets.UTF_8)
+        val END_IMAGE = "END;".toByteArray(Charsets.UTF_8)
+        val START_BBOX = "START_BBOX;".toByteArray(Charsets.UTF_8)
+        val END_BBOX = "END_BBOX;".toByteArray(Charsets.UTF_8)
+        val START_NODE_INFO = "START_NODE_INFO;".toByteArray(Charsets.UTF_8)
+        val END_NODE_INFO = "END_NODE_INFO;".toByteArray(Charsets.UTF_8)
+
+
 
         when {
             // Start of image transmission
-            data.size >= startImageBytes.size &&
-                    data.copyOfRange(0, startImageBytes.size).contentEquals(startImageBytes) -> {
+            data.startsWith(START_IMAGE) -> {
                 Log.d("BLE", "Start of image data")
                 receivedImageBuilder = StringBuilder()
                 processingImage = true
             }
-            // End of image transmission
-            data.size >= endImageBytes.size &&
-                    data.copyOfRange(0, endImageBytes.size).contentEquals(endImageBytes) -> {
+
+            data.startsWith(END_IMAGE) -> {
+                Log.d("BLE", "End of image transmission")
                 if (processingImage) {
-                    Log.d("BLE", "End of image transmission")
                     val completeBase64 = receivedImageBuilder.toString()
                     val decodedBytes = Base64.decode(completeBase64, Base64.DEFAULT)
                     val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
@@ -475,17 +402,16 @@ class MainActivity : AppCompatActivity() {
                 }
                 processingImage = false
             }
-            // Start of bounding box transmission
-            data.size >= startBboxBytes.size &&
-                    data.copyOfRange(0, startBboxBytes.size).contentEquals(startBboxBytes) -> {
+
+            data.startsWith(START_BBOX) -> {
                 Log.d("BLE", "Start of bounding box data")
                 currentImagePosition = imageBitmaps.size - 1
                 receivedBboxBuilder.reset()
                 processingBoundingBox = true
             }
-            // End of bounding box transmission
-            data.size >= endBboxBytes.size &&
-                    data.copyOfRange(0, endBboxBytes.size).contentEquals(endBboxBytes) -> {
+
+            data.startsWith(END_BBOX) -> {
+                Log.d("BLE", "End of bounding box transmission")
                 if (processingBoundingBox) {
                     Log.d("BLE", "End of bounding box transmission")
                     val bboxData = receivedBboxBuilder.toByteArray()
@@ -502,6 +428,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 processingBoundingBox = false
             }
+
             // Append incoming data for image
             processingImage -> {
                 receivedImageBuilder.append(String(data, Charsets.UTF_8))
@@ -567,19 +494,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Determines the selected animal based on radio button states.
-     * If none are selected, returns "Unknown".
-     */
-    private fun getSelectedAnimal(): String {
-        return when {
-            //switchCat.isChecked -> "Cat"
-            //switchDog.isChecked -> "Dog"
-            //switchSquirrel.isChecked -> "Squirrel"
-            //switchBird.isChecked -> "Bird"
-            else -> "Unknown"
-        }
-    }
 
     /**
      * Stores a detection record in the database.
@@ -589,7 +503,7 @@ class MainActivity : AppCompatActivity() {
         val imagePath = saveImageToInternalStorage(bitmap)
         if (imagePath != null) {
             // Use the current radio selection as the detected animal.
-            val animal = getSelectedAnimal()
+            val animal = "UNSET"//getSelectedAnimal()
             // Format the current timestamp (adjust format as needed).
             val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
             // For this example, we use a constant for camera; replace with real camera info if available.
@@ -605,19 +519,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun enableNotifications(
-        gatt: BluetoothGatt,
-        characteristic: BluetoothGattCharacteristic
-    ) {
-        gatt.setCharacteristicNotification(characteristic, true)
-        val descriptor = characteristic.getDescriptor(
-            UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
-        )
-        descriptor?.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-        gatt.writeDescriptor(descriptor)
-        Log.i("BLE", "Notifications enabled for ${characteristic.uuid}")
-    }
+
 
     /**
      * Sends animal status data via BLE.
@@ -631,40 +533,22 @@ class MainActivity : AppCompatActivity() {
         dogEnabled: Boolean,
         squirrelEnabled: Boolean
     ) {
-        if (!this::bluetoothGatt.isInitialized) {
-            Log.i("BLE", "Not connected to a device yet... not sending.")
-            return
-        }
+        val data = byteArrayOf(
+            packetId,
+            if (birdEnabled) 1 else 0,
+            if (catEnabled) 1 else 0,
+            if (dogEnabled) 1 else 0,
+            if (squirrelEnabled) 1 else 0
+        )
 
-        val service = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID)) ?: run {
-            Log.e("BLE", "Service not found.")
-            return
-        }
-        val char = service.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID)) ?: run {
-            Log.e("BLE", "Characteristic not found.")
-            return
-        }
-        if (char.properties and BluetoothGattCharacteristic.PROPERTY_WRITE == 0) {
-            Log.e("BLE", "Characteristic does not have write property.")
-            return
-        }
-
-        // Create a byte array: 1 byte for packet ID, 4 bytes for boolean flags.
-        val animalStatus = ByteArray(5)
-        animalStatus[0] = packetId
-        animalStatus[1] = if (birdEnabled) 1 else 0
-        animalStatus[2] = if (catEnabled) 1 else 0
-        animalStatus[3] = if (dogEnabled) 1 else 0
-        animalStatus[4] = if (squirrelEnabled) 1 else 0
-
-        char.value = animalStatus
-        val success = bluetoothGatt.writeCharacteristic(char)
+        val success = BleManager.getInstance().sendData(data)
         if (success) {
-            Log.d("BLE", "Animal status sent successfully with packet ID $packetId")
+            Log.d("BLE", "Animal status sent with packet ID $packetId")
         } else {
             Log.e("BLE", "Failed to send animal status")
         }
     }
+
 
     private fun checkAndRequestPermissions() {
         val permissions = mutableListOf(

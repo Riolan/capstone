@@ -3,18 +3,32 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattDescriptor
+import android.os.Build
 import android.util.Log
+import android.widget.Toast
+import java.util.UUID
+import android.content.Context
 
 interface BleConnectionListener {
     fun onDeviceConnected(device: BluetoothDevice)
     fun onDeviceDisconnected(device: BluetoothDevice)
 }
 
+interface BleDataListener {
+    fun onBleDataReceived(data: ByteArray)
+}
+
+
 class BleManager private constructor() {
     private var bluetoothGatt: BluetoothGatt? = null
     private var characteristic: BluetoothGattCharacteristic? = null
     private var isConnected = false
     private var currentDevice: BluetoothDevice? = null
+    // UUIDs for BLE Service and Characteristic
+    private val SERVICE_UUID = UUID.fromString("12345678-1234-1234-1234-123456789012")
+    private val CHARACTERISTIC_UUID = UUID.fromString("87654321-4321-4321-4321-210987654321")
 
     // Store all discovered devices
     private val discoveredDevices = mutableMapOf<String, BluetoothDevice>()
@@ -22,6 +36,21 @@ class BleManager private constructor() {
     // Store device-specific information
     private val deviceInfoMap = mutableMapOf<String, DeviceInfo>()
     private val connectionListeners = mutableListOf<BleConnectionListener>()
+    private val dataListeners = mutableListOf<BleDataListener>()
+
+    fun registerDataListener(listener: BleDataListener) {
+        if (!dataListeners.contains(listener)) {
+            dataListeners.add(listener)
+        }
+    }
+
+    fun unregisterDataListener(listener: BleDataListener) {
+        dataListeners.remove(listener)
+    }
+
+    fun notifyDataReceived(data: ByteArray) {
+        dataListeners.forEach { it.onBleDataReceived(data) }
+    }
 
     fun registerConnectionListener(listener: BleConnectionListener) {
         if (!connectionListeners.contains(listener)) {
@@ -148,15 +177,99 @@ class BleManager private constructor() {
     // Method for sending data over BLE
     @SuppressLint("MissingPermission")
     fun sendData(data: ByteArray): Boolean {
-        val gatt = bluetoothGatt
-        val char = characteristic
-
-        if (gatt != null && char != null) {
-            char.value = data
-            return gatt.writeCharacteristic(char)
+        val gatt = bluetoothGatt ?: run {
+            Log.e("BLE", "Not connected to a device.")
+            return false
         }
-        return false
+
+        val service = gatt.getService(SERVICE_UUID) ?: run {
+            Log.e("BLE", "Service not found: $SERVICE_UUID")
+            return false
+        }
+
+        val char = service.getCharacteristic(CHARACTERISTIC_UUID) ?: run {
+            Log.e("BLE", "Characteristic not found: $CHARACTERISTIC_UUID")
+            return false
+        }
+
+        if (char.properties and BluetoothGattCharacteristic.PROPERTY_WRITE == 0) {
+            Log.e("BLE", "Characteristic is not writable.")
+            return false
+        }
+
+        char.value = data
+        val success = gatt.writeCharacteristic(char)
+        if (success) {
+            Log.d("BLE", "Data sent successfully.")
+        } else {
+            Log.e("BLE", "Failed to send data.")
+        }
+        return success
     }
+
+
+
+    public val gattCallback = object : BluetoothGattCallback() {
+        @SuppressLint("MissingPermission")
+        override fun onConnectionStateChange(
+            gatt: BluetoothGatt,
+            status: Int,
+            newState: Int
+        ) {
+            if (newState == BluetoothGatt.STATE_CONNECTED) {
+                gatt.discoverServices()
+            } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+                Log.i("BLE", "Disconnected from device.")
+            }
+        }
+
+
+
+        @SuppressLint("MissingPermission")
+        override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                val service = gatt.getService((SERVICE_UUID))
+                if (service != null) {
+                    characteristic =
+                        service.getCharacteristic((CHARACTERISTIC_UUID))
+                    if (characteristic != null) {
+                        gatt.setCharacteristicNotification(characteristic, true)
+                        val descriptor = characteristic!!.getDescriptor(
+                            UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+                        )
+                        descriptor?.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                        gatt.writeDescriptor(descriptor)
+                        Log.i("BLE", "Notifications enabled for ${characteristic!!.uuid}")
+                    } else {
+                        Log.e("BLE", "Characteristic not found.")
+                    }
+                } else {
+                    Log.e("BLE", "Service not found.")
+                }
+            }
+        }
+
+        @Deprecated("Deprecated in Java")
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic
+        ) {
+            val value = characteristic.value
+            Log.d("BleManager", "Data received: ${value.joinToString(" ") { "%02X".format(it) }}")
+            notifyDataReceived(value)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun disconnect() {
+        bluetoothGatt?.disconnect()
+        bluetoothGatt?.close()
+        isConnected = false
+        Log.i("BLE", "Disconnected from BLE device.")
+
+    }
+
+
 
     companion object {
         @Volatile

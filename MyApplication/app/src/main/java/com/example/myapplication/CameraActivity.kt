@@ -27,6 +27,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 
 import com.example.myapplication.ui.BleManager
 import android.bluetooth.BluetoothDevice
+import com.example.myapplication.ui.BleDataListener
 
 class MyPagerAdapter(fragmentActivity: FragmentActivity, private val items: List<String>) : FragmentStateAdapter(fragmentActivity) {
     override fun getItemCount(): Int = items.size
@@ -51,7 +52,7 @@ class MyFragment : Fragment() {
 }
 
 
-class CameraActivity : AppCompatActivity(), BleConnectionListener {
+class CameraActivity : AppCompatActivity(), BleConnectionListener, BleDataListener {
 
     private lateinit var binding: ActivityCameraSettingsBinding
     private lateinit var CameraText: TextView
@@ -62,6 +63,7 @@ class CameraActivity : AppCompatActivity(), BleConnectionListener {
     private lateinit var prefs: SharedPreferences
     private lateinit var originalList: ArrayList<String>
     private lateinit var bleManager: BleManager
+    private lateinit var motherNodeText: TextView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,6 +87,7 @@ class CameraActivity : AppCompatActivity(), BleConnectionListener {
             finish() // Returns to MainActivity
         }
 
+        motherNodeText = findViewById(R.id.motherNodeLabel)
         tabLayout = findViewById(R.id.tabLayout)
         viewPager = findViewById(R.id.viewPager)
 
@@ -108,6 +111,12 @@ class CameraActivity : AppCompatActivity(), BleConnectionListener {
 
         updateConnectedDevicesUI()
     }
+
+    override fun onBleDataReceived(data: ByteArray) {
+        Log.i("BLE", data.toString())
+
+    }
+
     private fun createCustomTabView(position: Int): View {
         val view = layoutInflater.inflate(R.layout.custom_tab, null)
         val title = view.findViewById<TextView>(R.id.tabTitle)
@@ -149,14 +158,16 @@ class CameraActivity : AppCompatActivity(), BleConnectionListener {
     private fun updateConnectedDevicesUI() {
         // Get the current connected device
         val currentDevice = bleManager.getCurrentDevice()
-
         // Create a list with just the current device or a placeholder message
         deviceList = if (currentDevice != null) {
             // Get the device name - adjust this based on your device object structure
             val deviceName = currentDevice.name ?: "Unknown Device"
+            motherNodeText.setText("Mother Node: $deviceName")
             mutableListOf(deviceName)
 
         } else {
+            motherNodeText.setText("Mother Node: Not Connected")
+
             mutableListOf("No Connected Device")
         }
 
