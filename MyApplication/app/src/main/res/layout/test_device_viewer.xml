@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="8dp"
     android:layout_width="match_parent"
@@ -12,40 +11,73 @@
         android:id="@+id/backButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="back" />
+        android:text="Back" />
 
-    <!-- Mother Node Label -->
+    <!-- Mother Node Label and SYNC Button -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/syncButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SYNC" />
+
+        <TextView
+            android:id="@+id/motherNodeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:breakStrategy="simple"
+            android:gravity="center"
+            android:lines="2"
+            android:maxLines="2"
+            android:padding="16dp"
+            android:text="Mother Node: Not Connected"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <!-- Spinner for selecting nodes -->
+    <Spinner
+        android:id="@+id/nodeSelectorSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp" />
+
+    <!-- Content for the selected node -->
     <TextView
-        android:id="@+id/motherNodeLabel"
+        android:id="@+id/nodeDetailsText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:padding="16dp"
-        android:text="Mother Node: Not Connected"
-        android:textSize="18sp" />
+        android:padding="8dp"
+        android:text="Select a node to view details"
+        android:textSize="16sp" />
 
-    <!-- Tab Layout -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:tabMode="fixed"
-        app:tabGravity="fill"
-        android:layout_marginTop="8dp" />
-
-    <!-- ViewPager2 for Tab Content -->
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPager"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:layout_marginTop="8dp">
 
-    <!-- Reset Button at Bottom -->
+        <LinearLayout
+            android:id="@+id/nodeDetailsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <!-- Placeholder TextView; you can replace this programmatically -->
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Reset Button -->
     <Button
         android:id="@+id/resetAnimalsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="Reset Animals" />
+
 </LinearLayout>

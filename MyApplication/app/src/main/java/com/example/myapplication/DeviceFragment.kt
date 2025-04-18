@@ -22,6 +22,18 @@ class DeviceFragment : Fragment() {
     )
     private lateinit var prefs: SharedPreferences
 
+    companion object {
+        fun newInstance(node: Node): DeviceFragment {
+            val fragment = DeviceFragment()
+            val args = Bundle().apply {
+                putString("id", node.id)
+                putString("name", node.name)
+                putString("uuid", node.uuid)
+            }
+            fragment.arguments = args
+            return fragment
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +46,12 @@ class DeviceFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_device, container, false)
+
+
+        view.findViewById<TextView>(R.id.nodeName).text = arguments?.getString("name") ?: "Unnamed"
+        view.findViewById<TextView>(R.id.nodeId).text = arguments?.getString("id") ?: "Unknown"
+        view.findViewById<TextView>(R.id.nodeUuid).text = arguments?.getString("uuid") ?: "N/A"
+
 
         view.findViewById<TextView>(R.id.deviceNameTextView).text = deviceName
         val animalKeys = listOf("cat", "dog", "bird", "squirrel")

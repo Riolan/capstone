@@ -1,33 +1,34 @@
-
 package com.example.myapplication
+
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.databinding.ActivityCameraSettingsBinding
 import com.example.myapplication.ui.BleConnectionListener
-import com.example.myapplication.ui.main.SectionsPagerAdapter
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.myapplication.ui.BleDataListener
+import com.example.myapplication.ui.BleManager
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-import com.example.myapplication.ui.BleManager
-import android.bluetooth.BluetoothDevice
-import com.example.myapplication.ui.BleDataListener
+// Node data class for storing information about nodes
+data class Node(
+    val id: String,
+    val name: String,
+    val uuid: String,
+    val capabilities: MutableList<String> = mutableListOf("cat", "dog", "squirrel", "bird") // Default capabilities
+)
 
 class MyPagerAdapter(fragmentActivity: FragmentActivity, private val items: List<String>) : FragmentStateAdapter(fragmentActivity) {
     override fun getItemCount(): Int = items.size
@@ -41,7 +42,6 @@ class MyPagerAdapter(fragmentActivity: FragmentActivity, private val items: List
     }
 }
 
-
 class MyFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_camera_activity2, container, false)
@@ -51,175 +51,228 @@ class MyFragment : Fragment() {
     }
 }
 
-
 class CameraActivity : AppCompatActivity(), BleConnectionListener, BleDataListener {
 
-    private lateinit var binding: ActivityCameraSettingsBinding
-    private lateinit var CameraText: TextView
-    private lateinit var tabLayout: TabLayout
-    private lateinit var viewPager: ViewPager2
-    private lateinit var adapter: DevicePagerAdapter
-    private var deviceList: MutableList<String> = mutableListOf()
-    private lateinit var prefs: SharedPreferences
-    private lateinit var originalList: ArrayList<String>
-    private lateinit var bleManager: BleManager
-    private lateinit var motherNodeText: TextView
+    // Declare UI component variables but initialize them in onCreate
+    private lateinit var backButton: Button
+    private lateinit var syncButton: Button
+    private lateinit var motherNodeLabel: TextView
+    private lateinit var nodeSelectorSpinner: Spinner
+    private lateinit var nodeDetailsContainer: LinearLayout
+    private lateinit var nodeDetailsText: TextView
+    private lateinit var resetAnimalsButton: Button
 
+    private var receivedNodes: MutableList<Node> = mutableListOf()
+    private var isReceivingNodeInfo = false
+    private val nodeInfoBuilder = StringBuilder()
+    private var currentSelectedNode: Node? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.test_device_viewer)
 
-        val resetButton = findViewById<Button>(R.id.resetAnimalsButton)
-        resetButton.setOnClickListener {
-            val prefs = getSharedPreferences("SwitchPrefs", MODE_PRIVATE)
-            prefs.edit().clear().apply()
+        // Initialize UI components after setContentView
+        backButton = findViewById(R.id.backButton)
+        syncButton = findViewById(R.id.syncButton)
+        motherNodeLabel = findViewById(R.id.motherNodeLabel)
+        nodeSelectorSpinner = findViewById(R.id.nodeSelectorSpinner)
+        nodeDetailsContainer = findViewById(R.id.nodeDetailsContainer)
+        nodeDetailsText = findViewById(R.id.nodeDetailsText)
+        resetAnimalsButton = findViewById(R.id.resetAnimalsButton)
 
-            // Reset switches in all loaded fragments
-            for (i in 0 until adapter.itemCount) {
-                val fragment = adapter.getFragment(i)
-                fragment?.resetSwitchStates()
-            }
+        // Register listeners
+        BleManager.getInstance().registerConnectionListener(this)
+        BleManager.getInstance().registerDataListener(this)
+
+        // Set click listeners
+        syncButton.setOnClickListener {
+            val success = BleManager.getInstance().sendDataChunks("REQUEST_NODES\n".toByteArray(Charsets.UTF_8))
+            Log.d("BLE", if (success) "Request for nodes sent" else "Failed to send node request")
         }
 
-        val backButton = findViewById<Button>(R.id.backButton)
+        // Back button functionality
         backButton.setOnClickListener {
-            finish() // Returns to MainActivity
+            finish() // Close the activity
         }
 
-        motherNodeText = findViewById(R.id.motherNodeLabel)
-        tabLayout = findViewById(R.id.tabLayout)
-        viewPager = findViewById(R.id.viewPager)
-
-       // val deviceList = intent.getStringArrayListExtra("device_list")?.toMutableList() ?: mutableListOf()
-        prefs = getSharedPreferences("DevicePrefs", MODE_PRIVATE)
-
-        originalList = intent.getStringArrayListExtra("device_list") ?: arrayListOf()
-
-
-        bleManager = BleManager.getInstance()
-        bleManager.registerConnectionListener(this)
-
-        //deviceList.add("Test")
-        adapter = DevicePagerAdapter(this, deviceList)
-        viewPager.adapter = adapter
-
-
-        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.customView = createCustomTabView(position)
-        }.attach()
-
-        updateConnectedDevicesUI()
+        // Reset animals button functionality (placeholder)
+        resetAnimalsButton.setOnClickListener {
+            // Add your reset functionality here
+            Toast.makeText(this, "Resetting animals data...", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onBleDataReceived(data: ByteArray) {
-        Log.i("BLE", data.toString())
+        val text = data.toString(Charsets.UTF_8).trim()
+        Log.i("BLE", "Received: $text")
 
+        when {
+            text.startsWith("START_NODE_INFO;") -> {
+                isReceivingNodeInfo = true
+                nodeInfoBuilder.clear()
+            }
+            text.startsWith("END_NODE_INFO;") -> {
+                if (isReceivingNodeInfo) {
+                    processCompleteNodeInfo(nodeInfoBuilder.toString())
+                    isReceivingNodeInfo = false
+                }
+            }
+            isReceivingNodeInfo -> nodeInfoBuilder.append(text)
+        }
     }
 
-    private fun createCustomTabView(position: Int): View {
-        val view = layoutInflater.inflate(R.layout.custom_tab, null)
-        val title = view.findViewById<TextView>(R.id.tabTitle)
-        val button = view.findViewById<ImageButton>(R.id.renameButton)
+    @SuppressLint("MissingPermission")
+    private fun processCompleteNodeInfo(data: String) {
+        receivedNodes.clear()
+        val entries = data.split("NODE;")
+        for (entry in entries) {
+            if (entry.isEmpty()) continue
 
-        title.text = deviceList[position]
-
-        button.setOnClickListener {
-            showRenameDialog(position)
+            val parts = entry.split(";")
+            if (parts.size >= 3) {
+                val node = Node(parts[0], parts[1], parts[2])
+                receivedNodes.add(node)
+            }
         }
 
-        return view
-    }
-
-
-    override fun onDestroy() {
-        super.onDestroy()
-        // Unregister the connection listener to prevent memory leaks
-        bleManager.unregisterConnectionListener(this)
-    }
-
-    // Implement BleConnectionListener interface methods
-    override fun onDeviceConnected(device: BluetoothDevice) {
-        // Update UI when a device connects
         runOnUiThread {
-            updateConnectedDevicesUI()
+            BleManager.getInstance().getCurrentDevice()?.let { device ->
+                if (receivedNodes.isNotEmpty()) {
+                    val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, receivedNodes.map { it.name })
+                    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    nodeSelectorSpinner.adapter = spinnerAdapter
+
+                    nodeSelectorSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                            currentSelectedNode = receivedNodes[position]
+                            updateNodeDetails(receivedNodes[position])
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>) {
+                            nodeDetailsContainer.removeAllViews()
+                            currentSelectedNode = null
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+    private fun updateNodeDetails(node: Node) {
+        nodeDetailsContainer.removeAllViews()
+
+        // Inflate the node details layout
+        val inflater = LayoutInflater.from(this)
+        val nodeView = inflater.inflate(R.layout.node_details_layout, nodeDetailsContainer, false)
+
+        // Set node name in the TextView at the top
+        val nodeNameTextView = nodeView.findViewById<TextView>(R.id.editTextText)
+        nodeNameTextView.text = "${node.name} (${node.id})"
+
+        // Find the ScrollView and then get the LinearLayout inside it
+        val scrollView = nodeView.findViewById<ScrollView>(R.id.scrollView)
+        // Get the first child of the ScrollView which is our LinearLayout
+        val switchesContainer = scrollView.getChildAt(0) as LinearLayout
+
+        // Clear the default switches
+        switchesContainer.removeAllViews()
+
+        // Add capability switches
+        for (capability in node.capabilities) {
+            val switch = Switch(this).apply {
+                text = capability
+                textSize = 25f
+                isChecked = true  // Default to checked
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+            switchesContainer.addView(switch)
+        }
+
+        // Set up the save button
+        val saveButton = nodeView.findViewById<Button>(R.id.saveButton)
+        saveButton.setOnClickListener {
+            // Collect the capabilities that are enabled
+            val enabledCapabilities = mutableListOf<String>()
+            for (i in 0 until switchesContainer.childCount) {
+                val view = switchesContainer.getChildAt(i)
+                if (view is Switch && view.isChecked) {
+                    enabledCapabilities.add(view.text.toString())
+                }
+            }
+
+            // Send the updated capabilities to the node
+            sendNodeCapabilities(node, enabledCapabilities)
+
+            // Show confirmation
+            Toast.makeText(this, "Capabilities saved for ${node.name}", Toast.LENGTH_SHORT).show()
+        }
+
+
+        // Set up the save button
+        val requestImageButton = nodeView.findViewById<Button>(R.id.requestImageButton)
+        requestImageButton.setOnClickListener {
+            // Collect the capabilities that are enabled
+
+            val command = StringBuilder().apply {
+                append("REQUEST_IMAGE\n")
+                append("${node.id};")
+                append("\n")
+            }.toString()
+
+            val success = BleManager.getInstance().sendDataChunks(command.toByteArray(Charsets.UTF_8))
+            Log.d("BLE", if (success) "Request Image from ${node.name}" else "Failed to Request Image from ${node.name}")
+        }
+
+        // Add the view to the container
+        nodeDetailsContainer.addView(nodeView)
+    }
+
+    private fun sendNodeCapabilities(node: Node, enabledCapabilities: List<String>) {
+        // Format the capabilities as a command to send via BLE
+        val allAnimals = listOf("cat", "dog", "squirrel", "bird")
+
+        val command = StringBuilder().apply {
+            append("CHANGE_ANIMALS\n")
+            append("${node.id};")
+            append(
+                allAnimals.joinToString(",") { animal ->
+                    if (animal in enabledCapabilities) "1" else "0"
+                }
+            )
+            append("\n")
+        }.toString()
+
+        val success = BleManager.getInstance().sendDataChunks(command.toByteArray(Charsets.UTF_8))
+        Log.d("BLE", if (success) "Capabilities sent for ${node.name}" else "Failed to send capabilities for ${node.name}")
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onDeviceConnected(device: BluetoothDevice) {
+        Log.d("BLE", "Device CONNECTED CameraActivity")
+        runOnUiThread {
+            Toast.makeText(this, "Device connected: ${device.name ?: device.address}", Toast.LENGTH_SHORT).show()
+            motherNodeLabel.text = "Mother Node: ${device.name}"
+
         }
     }
 
     override fun onDeviceDisconnected(device: BluetoothDevice) {
-        // Update UI when a device disconnects
+        Log.d("BLE", "Device disconnect CameraActivity")
         runOnUiThread {
-            updateConnectedDevicesUI()
+            Toast.makeText(this, "Device disconnected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "TODO: RESET TO DEFAULT VIEW", Toast.LENGTH_SHORT).show()
+            motherNodeLabel.text = "Mother Node: Not Connected"
+
         }
     }
 
-    // This method updates the UI to show only connected devices
-    @SuppressLint("MissingPermission")
-    private fun updateConnectedDevicesUI() {
-        // Get the current connected device
-        val currentDevice = bleManager.getCurrentDevice()
-        // Create a list with just the current device or a placeholder message
-        deviceList = if (currentDevice != null) {
-            // Get the device name - adjust this based on your device object structure
-            val deviceName = currentDevice.name ?: "Unknown Device"
-            motherNodeText.setText("Mother Node: $deviceName")
-            mutableListOf(deviceName)
-
-        } else {
-            motherNodeText.setText("Mother Node: Not Connected")
-
-            mutableListOf("No Connected Device")
-        }
-
-        if (currentDevice != null) {
-            // This will instead need to host Edge Nodes
-
-            // Check if adapter is already initialized
-            if (::adapter.isInitialized) {
-                adapter.updateDevices(deviceList)
-            } else {
-                adapter = DevicePagerAdapter(this, deviceList)
-                viewPager.adapter = adapter
-
-                TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-                    tab.customView = createCustomTabView(position)
-                }.attach()
-            }
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        BleManager.getInstance().unregisterConnectionListener(this)
+        BleManager.getInstance().unregisterDataListener(this)
     }
-
-    private fun showRenameDialog(position: Int) {
-        val currentName = deviceList[position]
-        val editText = EditText(this).apply {
-            setText(currentName)
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("Rename Device")
-            .setView(editText)
-            .setPositiveButton("Rename") { _, _ ->
-                val newName = editText.text.toString().trim()
-                if (newName.isNotEmpty()) {
-                    deviceList[position] = newName
-
-                    // Update SharedPreferences
-                    prefs.edit().putString("device_$position", newName).apply()
-
-                    // Update tab title
-                    val tab = tabLayout.getTabAt(position)
-                    val customView = tab?.customView
-                    val title = customView?.findViewById<TextView>(R.id.tabTitle)
-                    title?.text = newName
-
-                    // Optionally: notify fragment to refresh content
-                    adapter.notifyItemChanged(position)
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-
 }
-
-

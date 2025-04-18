@@ -5,11 +5,11 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattDescriptor
-import android.os.Build
+import android.bluetooth.BluetoothProfile
 import android.util.Log
-import android.widget.Toast
 import java.util.UUID
-import android.content.Context
+import android.os.Handler
+import android.os.Looper
 
 interface BleConnectionListener {
     fun onDeviceConnected(device: BluetoothDevice)
@@ -135,11 +135,15 @@ class BleManager private constructor() {
     }
 
     // Set current device and GATT when connecting
-    fun setCurrentDevice(device: BluetoothDevice) {
+    fun setCurrentDevice(device: BluetoothDevice?) {
         currentDevice = device
-        notifyDeviceConnected(device)
+        if (device != null) {
+            notifyDeviceConnected(device)
+        }
 
-        addDevice(device) // Ensure the device is in our maps
+        if (device != null) {
+            addDevice(device)
+        } // Ensure the device is in our maps
     }
 
     // Get the current device
@@ -147,7 +151,7 @@ class BleManager private constructor() {
         return currentDevice
     }
 
-    fun setGatt(gatt: BluetoothGatt) {
+    fun setGatt(gatt: BluetoothGatt?) {
         this.bluetoothGatt = gatt
     }
 
@@ -155,7 +159,7 @@ class BleManager private constructor() {
         return bluetoothGatt
     }
 
-    fun setCharacteristic(characteristic: BluetoothGattCharacteristic) {
+    fun setCharacteristic(characteristic: BluetoothGattCharacteristic?) {
         this.characteristic = characteristic
     }
 
@@ -207,6 +211,56 @@ class BleManager private constructor() {
         return success
     }
 
+    @SuppressLint("MissingPermission")
+    fun sendDataChunks(data: ByteArray): Boolean {
+        val gatt = bluetoothGatt ?: run {
+            Log.e("BLE", "Not connected to a device.")
+            return false
+        }
+
+        val service = gatt.getService(SERVICE_UUID) ?: run {
+            Log.e("BLE", "Service not found: $SERVICE_UUID")
+            return false
+        }
+
+        val char = service.getCharacteristic(CHARACTERISTIC_UUID) ?: run {
+            Log.e("BLE", "Characteristic not found: $CHARACTERISTIC_UUID")
+            return false
+        }
+
+        if (char.properties and BluetoothGattCharacteristic.PROPERTY_WRITE == 0) {
+            Log.e("BLE", "Characteristic is not writable.")
+            return false
+        }
+
+        val chunkSize = 20
+        var offset = 0
+
+        while (offset < data.size) {
+            val end = (offset + chunkSize).coerceAtMost(data.size)
+            val chunk = data.copyOfRange(offset, end)
+
+            char.value = chunk
+            val success = gatt.writeCharacteristic(char)
+
+            if (!success) {
+                Log.e("BLE", "Failed to send chunk at offset $offset.")
+                return false
+            }
+
+            Log.d("BLE", "Chunk sent: ${chunk.joinToString(" ") { it.toString(16).padStart(2, '0') }}")
+
+            offset += chunkSize
+
+            // Small delay
+            Thread.sleep(100)
+        }
+
+        Log.d("BLE", "All data chunks sent successfully.")
+        return true
+    }
+
+
 
 
     public val gattCallback = object : BluetoothGattCallback() {
@@ -216,10 +270,34 @@ class BleManager private constructor() {
             status: Int,
             newState: Int
         ) {
-            if (newState == BluetoothGatt.STATE_CONNECTED) {
+            val deviceAddress = gatt.device.address
+
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                Log.i("BLE", "Connected to GATT server.")
+                setConnected(true)
                 gatt.discoverServices()
-            } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-                Log.i("BLE", "Disconnected from device.")
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                /*Log.i("BLE", "Disconnected from GATT server.")
+
+                // Even if we get a disconnect callback, explicitly close the GATT
+                try {
+                    gatt.close()
+                } catch (e: Exception) {
+                    Log.e("BLE", "Error closing GATT: ${e.message}")
+                }
+
+                // Update internal state
+                setConnected(false)
+                if (getCurrentDevice()?.address == deviceAddress) {
+                    getCurrentDevice()?.let { notifyDeviceDisconnected(it) }
+                    setCurrentDevice(null)
+                }
+
+                // Clear references
+                if (getGatt() == gatt) {
+                    setGatt(null)
+                    setCharacteristic(null)
+                }*/
             }
         }
 
@@ -262,11 +340,56 @@ class BleManager private constructor() {
 
     @SuppressLint("MissingPermission")
     fun disconnect() {
-        bluetoothGatt?.disconnect()
-        bluetoothGatt?.close()
-        isConnected = false
-        Log.i("BLE", "Disconnected from BLE device.")
+        val device = getCurrentDevice()
+        Log.d("BLE", "BleManager disconnect() called")
 
+        try {
+            if (bluetoothGatt != null) {
+                // Disable notifications first
+                characteristic?.let { char ->
+                    try {
+                        bluetoothGatt?.setCharacteristicNotification(char, false)
+                        Log.d("BLE", "Disabled notifications for characteristic")
+                    } catch (e: Exception) {
+                        Log.e("BLE", "Failed to disable notifications", e)
+                    }
+                }
+
+                // Disconnect from GATT
+                Log.d("BLE", "Disconnecting from GATT server...")
+                bluetoothGatt?.disconnect()
+
+                // Schedule cleanup
+                Handler(Looper.getMainLooper()).postDelayed({
+                    try {
+                        bluetoothGatt?.close()
+                        Log.d("BLE", "GATT connection closed")
+                    } catch (e: Exception) {
+                        Log.e("BLE", "Error closing GATT", e)
+                    } finally {
+                        // Always reset state regardless of success
+                        bluetoothGatt = null
+                        characteristic = null
+                        setConnected(false)
+                        device?.let { notifyDeviceDisconnected(it) }
+                        currentDevice = null
+                        Log.i("BLE", "Disconnected and closed GATT connection")
+                    }
+                }, 500)
+            } else {
+                Log.w("BLE", "No GATT connection to disconnect")
+                setConnected(false)
+                device?.let { notifyDeviceDisconnected(it) }
+                currentDevice = null
+            }
+        } catch (e: Exception) {
+            Log.e("BLE", "Error during disconnect: ${e.message}")
+            // Force cleanup in case of exception
+            bluetoothGatt = null
+            characteristic = null
+            setConnected(false)
+            currentDevice = null
+        }
     }
 
 

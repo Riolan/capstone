@@ -55,6 +55,11 @@
           <theme>@style/Theme.AppCompat.Light</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/node_details_layout.xml">
+        <config>
+          <theme>@style/Theme.AppCompat.Light</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/test_device_viewer.xml">
         <config>
           <theme>@style/Theme.AppCompat.Light</theme>
@@ -71,17 +76,26 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec266900-7bf5-4e28-915d-7af90825dcb6" name="Changes" comment="Updated to GUI &#10;- Fix of BLE Characteristics&#10;- Added BleManager for communication to Mothernode&#10;- Others I don't remember from my lack of sleep">
+    <list default="true" id="ec266900-7bf5-4e28-915d-7af90825dcb6" name="Changes" comment="Updated to GUI">
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/node_details_layout.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.9/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.9/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.9/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.9/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.9/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.9/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/CameraActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/CameraActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/DeviceFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/DeviceFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/DevicePagerAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/DevicePagerAdapter.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/MainActivity.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/ui/BleManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/ui/BleManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/custom_tab.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/custom_tab.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_device.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_device.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/test_device_viewer.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/test_device_viewer.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -125,8 +139,8 @@
         <option value="valueResourceFile" />
         <option value="resourceFile" />
         <option value="Class" />
-        <option value="layoutResourceFile" />
         <option value="Kotlin Class" />
+        <option value="layoutResourceFile" />
       </list>
     </option>
   </component>
@@ -178,8 +192,8 @@
     "git-widget-placeholder": "updated-Gui-with-Device-Tabs",
     "kotlin-language-version-configured": "true",
     "last_directory_selection": "C:/Users/aly35/AndroidStudioProjects/MyApplication/app/src/main/res/drawable",
-    "last_opened_file_path": "C:/Users/aly35/AndroidStudioProjects/MyApplication/app/src/main/res/drawable",
-    "settings.editor.selected.configurable": "AndroidSdkUpdater"
+    "last_opened_file_path": "C:/Users/Rio/Downloads/capstone-47cc6e396b8422b4fd28eac40757b966eb3dc166/MyApplication",
+    "settings.editor.selected.configurable": "device.mirroring"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -285,13 +299,22 @@
       <option name="project" value="LOCAL" />
       <updated>1744914778749</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Updated to GUI &#10;- Fix to BLE to better enable communication to Mothernode">
+      <option name="closed" value="true" />
+      <created>1744927755731</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1744927755731</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Updated to GUI &#10;- fixed being able to scroll through of blue tooth list&#10;- added ability to see what you are connected to and then disconnect &#10;- removed the buttons on the home page for animal selection" />
     <MESSAGE value="Updated to GUI &#10;- Fix of BLE Characteristics&#10;- Added BleManager for communication to Mothernode&#10;- Others I don't remember from my lack of sleep" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated to GUI &#10;- Fix of BLE Characteristics&#10;- Added BleManager for communication to Mothernode&#10;- Others I don't remember from my lack of sleep" />
+    <MESSAGE value="Updated to GUI &#10;- Fix to BLE to better enable communication to Mothernode" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated to GUI &#10;- Fix to BLE to better enable communication to Mothernode" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">

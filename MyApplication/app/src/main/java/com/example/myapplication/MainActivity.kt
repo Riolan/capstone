@@ -21,18 +21,15 @@ import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.example.myapplication.ui.BleConnectionListener
 import com.example.myapplication.ui.BleDataListener
-import com.google.firebase.auth.FirebaseAuth
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -117,7 +114,7 @@ class ImageAdapter(
     }
 }
 
-class MainActivity : AppCompatActivity(), BleDataListener {
+class MainActivity : AppCompatActivity(), BleDataListener, BleConnectionListener {
 
     // Bluetooth-related variables
     private lateinit var bluetoothAdapter: BluetoothAdapter
@@ -160,6 +157,8 @@ class MainActivity : AppCompatActivity(), BleDataListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        BleManager.getInstance().registerConnectionListener(this)
 
         // Initialize DatabaseHelper
         dbHelper = DatabaseHelper(this)
@@ -324,35 +323,111 @@ class MainActivity : AppCompatActivity(), BleDataListener {
         }
     }
 
+    private val scanCallbackEnd = object : ScanCallback() {
+    }
+
     // UPDATED: Use newer connectGatt signature on API 23+ with transport parameter
     @SuppressLint("MissingPermission")
     private fun connectToDevice(device: BluetoothDevice) {
+        if (!BleManager.getInstance().isConnected()) {
+            val gatt = device.connectGatt(this, false, BleManager.getInstance().gattCallback, BluetoothDevice.TRANSPORT_LE)
+            BleManager.getInstance().setGatt(gatt)
+            BleManager.getInstance().setCurrentDevice(device)
 
-        val gatt = device.connectGatt(this, false, BleManager.getInstance().gattCallback)
-        BleManager.getInstance().setGatt(gatt)
-        BleManager.getInstance().setCurrentDevice(device)
+            Toast.makeText(this, "Connecting to ${device.name}", Toast.LENGTH_SHORT).show()
+            // TODO: Update button and text to show where connected to.
+            isConnectedText.setText("Connected to: ${device.name}")
+            isConnectedButton.setEnabled(true)
+            isConnectedButton.setClickable(true)
+            BleManager.getInstance().setConnected(true)
 
-        Toast.makeText(this, "Connecting to ${device.name}", Toast.LENGTH_SHORT).show()
-        // TODO: Update button and text to show where connected to.
-        isConnectedText.setText("Connected to: ${device.name}")
-        isConnectedButton.setEnabled(true)
-        isConnectedButton.setClickable(true)
-        BleManager.getInstance().setConnected(true)
+            bluetoothLeScanner.stopScan(scanCallbackEnd)
+        } else {
 
+            Toast.makeText(this, "Already connected to ${device.name}", Toast.LENGTH_SHORT).show()
+
+        }
     }
 
     // TODO: This might be dumb haha
     val activity = this  // inside MainActivity
 
+    @SuppressLint("MissingPermission")
     private fun disconnectFromDevice() {
+        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val device = BleManager.getInstance().getCurrentDevice()
+        val gatt = BleManager.getInstance().getGatt()
+
+        if (device == null || gatt == null) {
+            Log.w("BLE", "No device or GATT to disconnect")
+            isConnectedText.text = "Not Connected"
+            isConnectedButton.isEnabled = false
+            isConnectedButton.isClickable = false
+            return
+        }
+
+        // 1. Attempt standard disconnect
+        Log.d("BLE", "Starting disconnect sequence for ${device.address}")
         BleManager.getInstance().disconnect()
 
-        Toast.makeText(this, "Disconnected from device.", Toast.LENGTH_SHORT).show()
-        Log.i("BLE", "Disconnected from device.")
+        // 2. Schedule a check to verify disconnection
+        Handler(Looper.getMainLooper()).postDelayed({
+            val connectionState = bluetoothManager.getConnectionState(device, BluetoothProfile.GATT)
 
-        isConnectedText.text = "Not Connected"
-        isConnectedButton.isEnabled = false
-        isConnectedButton.isClickable = false
+            if (connectionState != BluetoothProfile.STATE_DISCONNECTED) {
+                Log.w("BLE", "Device appears to still be connected after disconnect attempt! Forcing close...")
+
+                // 3. Force close the GATT connection
+                try {
+                    gatt.close()
+                    BleManager.getInstance().setGatt(null)
+
+                    // 4. Use reflection to clear system cache (requires specific permission)
+                    try {
+                        val bluetoothGattClass = BluetoothGatt::class.java
+                        val refreshMethod = bluetoothGattClass.getMethod("refresh")
+                        refreshMethod.invoke(gatt)
+                        Log.d("BLE", "Attempted to refresh GATT state via reflection")
+                    } catch (e: Exception) {
+                        Log.e("BLE", "Could not use reflection to refresh GATT", e)
+                    }
+
+                    // 5. Reset Bluetooth adapter if necessary (very aggressive approach)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        // On Android 13+, we need to be careful about adapter resets
+                        Log.w("BLE", "Clearing device cache without adapter reset")
+                    } else {
+                        val adapter = bluetoothManager.adapter
+                        try {
+                            Log.w("BLE", "Attempting to reset Bluetooth adapter")
+                            adapter.disable()
+                            // We'll re-enable it after a delay
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                adapter.enable()
+                                Log.d("BLE", "Bluetooth adapter re-enabled")
+                            }, 2000)
+                        } catch (e: Exception) {
+                            Log.e("BLE", "Failed to reset Bluetooth adapter", e)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("BLE", "Error during force disconnect", e)
+                }
+            } else {
+                Log.d("BLE", "Device successfully disconnected confirmed by system")
+            }
+
+            // Update state in BLE manager
+            BleManager.getInstance().setConnected(false)
+            BleManager.getInstance().setCurrentDevice(null)
+
+            // Always update UI
+            isConnectedText.text = "Not Connected"
+            isConnectedButton.isEnabled = false
+            isConnectedButton.isClickable = false
+        }, 1000)
+
+        Toast.makeText(this, "Disconnecting from device...", Toast.LENGTH_SHORT).show()
     }
 
 
@@ -581,4 +656,27 @@ class MainActivity : AppCompatActivity(), BleDataListener {
             }
         }
     }
+
+    override fun onDeviceDisconnected(device: BluetoothDevice) {
+        Log.d("BLE", "Device disconnect MainActivity")
+        runOnUiThread {
+            Toast.makeText(this, "Device disconnected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "TODO: RESET TO DEFAULT VIEW", Toast.LENGTH_SHORT).show()
+
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onDeviceConnected(device: BluetoothDevice) {
+        Log.d("BLE", "Device CONNECTED MainActivity")
+        runOnUiThread {
+            Toast.makeText(this, "Device connected: ${device.name ?: device.address}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        BleManager.getInstance().disconnect()
+    }
+
 }

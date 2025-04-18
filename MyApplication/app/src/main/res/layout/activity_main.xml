@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#98D4FF"
+    android:background="#F6F6F6"
     android:orientation="vertical"
     android:padding="16dp"
     tools:context=".MainActivity">
@@ -27,7 +27,7 @@
                 android:id="@+id/logoutButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#1FA6FF"
+                android:backgroundTint="#D5D6D6"
                 android:text="Logout" />
 
             <TableRow
@@ -46,7 +46,7 @@
                     android:id="@+id/disconnectButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="#1FA6FF"
+                    android:backgroundTint="#D5D6D6"
                     android:text="Disconnect" />
             </TableRow>
         </LinearLayout>
