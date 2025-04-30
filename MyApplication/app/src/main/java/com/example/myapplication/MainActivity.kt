@@ -162,8 +162,11 @@ class MainActivity : AppCompatActivity() {
 
         // Shared Preferences and Login Check
         sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
-        val userLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
-        if (!userLoggedIn) {
+        val email = sharedPreferences.getString("email", null)
+        val passwordHash = sharedPreferences.getString("password", null)
+        dbHelper = DatabaseHelper(this)
+
+        if (email == null || passwordHash == null || !dbHelper.isValidUserHashed(email, passwordHash)) {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
             return

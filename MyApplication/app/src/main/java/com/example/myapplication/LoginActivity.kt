@@ -46,6 +46,8 @@ class LoginActivity : AppCompatActivity() {
                 // Save login state
                 val editor = sharedPreferences.edit()
                 editor.putBoolean("isLoggedIn", true)
+                editor.putString("email", email)
+                editor.putString("password", dbHelper.getHashedPassword(email))
                 editor.apply()
 
                 Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()

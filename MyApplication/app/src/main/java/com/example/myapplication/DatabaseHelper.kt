@@ -94,4 +94,23 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return result != -1L
     }
+
+    fun isValidUserHashed(email: String, passwordHash: String): Boolean {
+        val db = readableDatabase
+        val query = "SELECT * FROM users WHERE email = ? AND password = ?"
+        val cursor = db.rawQuery(query, arrayOf(email, passwordHash))
+        val isValid = cursor.count > 0
+        cursor.close()
+        db.close()
+        return isValid
+    }
+
+    fun getHashedPassword(email: String): String? {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT password FROM users WHERE email = ?", arrayOf(email))
+        val result = if (cursor.moveToFirst()) cursor.getString(0) else null
+        cursor.close()
+        db.close()
+        return result
+    }
 }
