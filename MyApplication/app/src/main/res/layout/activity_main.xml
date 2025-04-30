@@ -25,6 +25,13 @@
         android:layout_height="wrap_content"
         android:text="Logout" />
 
+    <!--  Detection Button  -->
+    <Button
+        android:id="@+id/viewDetectionLogsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Detection Log" />
+
     <!-- ViewPager for displaying images or pages.
          Set height to 0dp and weight=1 so it shares space with the next layout. -->
     <androidx.viewpager2.widget.ViewPager2

@@ -3,15 +3,18 @@ package com.example.myapplication
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import java.security.MessageDigest
+
+
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
         private const val DATABASE_NAME = "users.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
 
         // Existing user table constants
         private const val TABLE_USERS = "users"
@@ -43,9 +46,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_DETECTIONS")
-        onCreate(db)
+        if (oldVersion < 2) {
+            val createDetectionsTable = "CREATE TABLE $TABLE_DETECTIONS (" +
+                    "$COLUMN_DETECTION_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "$COLUMN_DETECTED_ANIMAL TEXT, " +
+                    "$COLUMN_TIMESTAMP TEXT, " +
+                    "$COLUMN_CAMERA TEXT, " +
+                    "$COLUMN_IMAGE_PATH TEXT)"
+            db.execSQL(createDetectionsTable)
+        }
     }
 
     // Hash function using SHA-256 for passwords
@@ -112,5 +121,33 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         cursor.close()
         db.close()
         return result
+    }
+
+    fun getAllDetections(): Cursor {
+        val db = readableDatabase
+        return db.rawQuery("SELECT * FROM detections ORDER BY timestamp DESC", null)
+    }
+
+    // Test Data
+    fun populateTestData() {
+        val testData = listOf(
+            Triple("Cat", "2024-04-01 10:30:00", "Front Camera"),
+            Triple("Dog", "2024-04-03 15:45:00", "Back Camera"),
+            Triple("Squirrel", "2024-04-10 08:12:00", "Tree Cam"),
+            Triple("Bird", "2024-04-14 09:00:00", "Bird Feeder"),
+            Triple("Cat", "2024-04-16 12:00:00", "Front Camera")
+        )
+
+        val db = writableDatabase
+        for ((animal, timestamp, camera) in testData) {
+            val values = ContentValues().apply {
+                put(COLUMN_DETECTED_ANIMAL, animal)
+                put(COLUMN_TIMESTAMP, timestamp)
+                put(COLUMN_CAMERA, camera)
+                put(COLUMN_IMAGE_PATH, "test_path_${animal.lowercase()}.png")
+            }
+            db.insert(TABLE_DETECTIONS, null, values)
+        }
+        db.close()
     }
 }

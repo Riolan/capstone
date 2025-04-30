@@ -159,8 +159,18 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize DatabaseHelper
         dbHelper = DatabaseHelper(this)
+        dbHelper.populateTestData() //test data
 
-        // Shared Preferences and Login Check
+//        // Shared Preferences and Login Check
+//        sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+//        val userLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+//        if (!userLoggedIn) {
+//            startActivity(Intent(this, LoginActivity::class.java))
+//            finish()
+//            return
+//        }
+
+        // Fixed code for secure login
         sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         val email = sharedPreferences.getString("email", null)
         val passwordHash = sharedPreferences.getString("password", null)
@@ -180,6 +190,12 @@ class MainActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.viewPager)
         img_adapter = ImageAdapter(imageBitmaps, boundingBoxes)
         viewPager.adapter = img_adapter
+
+        // Detection Log Button
+        val viewDetectionLogsButton = findViewById<Button>(R.id.viewDetectionLogsButton)
+        viewDetectionLogsButton.setOnClickListener {
+            startActivity(Intent(this, DetectionLogActivity::class.java))
+        }
 
         // RadioButtons and Submit Button
         radioCat = findViewById(R.id.radioCat)
