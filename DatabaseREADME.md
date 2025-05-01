@@ -2,6 +2,10 @@
 
 This project provides a Python-based pipeline for uploading images and annotations to AWS S3 and inserting their metadata into a PostgreSQL database hosted on AWS RDS. It uses COCO-style JSON annotations to populate image classification and bounding box tables for training AI models.
 
+## Database Contains
+- 27000+ labeled images
+- Original annotation files in COCO format for the images
+- The sql schema for the tables 
 
 ## ✅ Prerequisites
 
