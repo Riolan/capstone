@@ -38,13 +38,11 @@ You can download the entire ready-to-use project as a ZIP file:
 ### 1. Backend (Flask)
 
 #### 🔧 Install dependencies
-
-    ```bash
     pip install -r requirements.txt
+
 ### 2. Copy .env.example to .env and fill in your actual secrets:
 
 ### 3. ▶️ Run Flask API
-    ```bash
     python app.py
 
 ### 1. Frontend (React)
@@ -53,7 +51,6 @@ You can download the entire ready-to-use project as a ZIP file:
 - React + Axios
 
 ### 🔧 Setup
-    ```bash
     cd frontend
     npm install
     npm start
