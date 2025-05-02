@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"> <FrameLayout
+        android:id="@+id/image_frame"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="1:1" app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/item_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription=""
+            android:scaleType="centerCrop"
+            tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+        <com.example.sampleviewer.ui.BoundingBoxView
+            android:id="@+id/item_bbox_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" tools:visibility="visible"/>
+
+    </FrameLayout>
+
+        <TextView
+            android:id="@+id/item_animal_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintTop_toBottomOf="@id/image_frame"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Squirrel, Bird" />
+
+        <TextView
+            android:id="@+id/item_timestamp_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="?attr/textAppearanceCaption"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintTop_toBottomOf="@id/item_animal_text"
+            app:layout_constraintStart_toStartOf="@id/item_animal_text"
+            app:layout_constraintEnd_toEndOf="@id/item_animal_text"
+            tools:text="2025-04-30 10:00:00" />
+
+        <TextView
+            android:id="@+id/item_uuid_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="?attr/textAppearanceCaption"
+            android:textSize="10sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintTop_toBottomOf="@id/item_timestamp_text"
+            app:layout_constraintStart_toStartOf="@id/item_animal_text"
+            app:layout_constraintEnd_toEndOf="@id/item_animal_text"
+            tools:text="UUID: 1a2b3c4d" />
+
+        <TextView
+            android:id="@+id/item_bbox_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="?attr/textAppearanceCaption"
+            android:textSize="10sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintTop_toBottomOf="@id/item_uuid_text"
+            app:layout_constraintStart_toStartOf="@id/item_animal_text"
+            app:layout_constraintEnd_toEndOf="@id/item_animal_text"
+            tools:text="BBox: [10, 20, 50, 60]" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/item_button_download"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@color/black"
+            android:text="Download"
+            android:textSize="10sp"
+            app:icon="@drawable/baseline_download_24"
+            app:iconPadding="4dp"
+            app:iconSize="14dp"
+            app:layout_constraintEnd_toEndOf="@id/item_animal_text"
+            app:layout_constraintTop_toBottomOf="@id/item_bbox_text" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_width="match_parent"
+
+    android:layout_height="match_parent"
+
+    tools:context="com.example.sampleviewer.SettingsFragment">
+
+
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+
+        android:orientation="vertical"
+
+        android:padding="16dp">
+
+
+
+        <TextView
+
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+
+            android:text="@string/device_information"
+
+            android:textAppearance="?attr/textAppearanceHeadline6"
+
+            android:layout_marginBottom="8dp"/>
+
+
+
+        <TextView
+
+            android:id="@+id/device_id_label"
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:text="@string/device_id_placeholder"
+
+            android:textAppearance="?attr/textAppearanceBody1"
+
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+
+            android:id="@+id/battery_level_label"
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:text="@string/battery_level_placeholder"
+
+            android:textAppearance="?attr/textAppearanceBody1"
+
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+
+            android:id="@+id/signal_strength_label"
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:text="@string/signal_strength_placeholder"
+
+            android:textAppearance="?attr/textAppearanceBody1"
+
+            android:layout_marginBottom="16dp"/>
+
+
+
+
+
+        <TextView
+
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+
+            android:text="@string/camera_settings"
+
+            android:textAppearance="?attr/textAppearanceHeadline6"
+
+            android:layout_marginTop="16dp"
+
+            android:layout_marginBottom="8dp"/>
+
+
+
+        <TextView
+
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+
+            android:text="@string/motion_sensitivity"
+
+            android:textAppearance="?attr/textAppearanceBody1"
+
+            android:labelFor="@+id/seekbar_sensitivity"/>
+
+        <SeekBar
+
+            android:id="@+id/seekbar_sensitivity"
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:max="100"
+
+            android:progress="50"
+
+            android:layout_marginTop="4dp"
+
+            android:layout_marginBottom="16dp"/>
+
+
+
+        <TextView
+
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+
+            android:text="@string/image_quality"
+
+            android:textAppearance="?attr/textAppearanceBody1"
+
+            android:labelFor="@+id/spinner_quality"/>
+
+        <Spinner
+
+            android:id="@+id/spinner_quality"
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:minHeight="48dp"
+
+            android:entries="@array/image_quality_options" /> <com.google.android.material.textfield.TextInputLayout
+
+        android:id="@+id/text_input_interval"
+
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="16dp"
+
+        android:hint="@string/reporting_interval_hint">
+
+
+
+        <com.google.android.material.textfield.TextInputEditText
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:inputType="number" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+
+
+
+        <com.google.android.material.button.MaterialButton
+
+            android:id="@+id/button_save_settings"
+
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+
+            android:layout_gravity="center_horizontal"
+
+            android:text="@string/save_settings"
+
+            android:layout_marginTop="24dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_open_dev_tools"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:text="Developer Tools" />
+
+    </LinearLayout>
+
+</ScrollView>

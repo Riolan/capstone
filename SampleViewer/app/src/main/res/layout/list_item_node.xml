@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/collapsed_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/node_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItem"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/expand_button"
+                app:layout_constraintBottom_toTopOf="@+id/node_status"
+                tools:text="Sensor Node Alpha"/>
+
+            <TextView
+                android:id="@+id/node_status"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItemSecondary"
+                android:textColor="?android:attr/textColorSecondary"
+                app:layout_constraintTop_toBottomOf="@id/node_name"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/expand_button"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:text="Status: OK, Last Seen: 2m ago"/>
+
+            <ImageButton
+                android:id="@+id/expand_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_more"
+                android:contentDescription="@string/expand_node_details"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:id="@+id/expanded_details_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/node_detail_battery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBody2"
+                tools:text="Battery: 78%"/>
+
+            <TextView
+                android:id="@+id/node_detail_signal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBody2"
+                tools:text="Signal: -95 dBm"/>
+
+            <!--<TextView
+                android:id="@+id/node_detail_last_event"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBody2"
+                tools:text="Last Event: Motion Detected"/>-->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detectable_animals"
+                android:textAppearance="?attr/textAppearanceSubtitle2"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp"/>
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/checkbox_detect_cat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/animal_cat"/>
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/checkbox_detect_dog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/animal_dog"/>
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/checkbox_detect_squirrel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/animal_squirrel"/>
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/checkbox_detect_bird"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/animal_bird"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_update_node"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="8dp"
+                android:text="@string/update_node_settings"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

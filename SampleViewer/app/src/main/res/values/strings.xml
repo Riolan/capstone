@@ -1,0 +1,55 @@
+<resources>
+    <string name="app_name">Smart Trail Camera</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="save_settings">Save Settings</string>
+    <string name="refresh">Refresh</string>
+
+    <string name="camera_name_placeholder">STC</string>
+    <string name="status_disconnected">Status: Disconnected</string>
+    <string name="status_connected">Status: Connected</string>
+    <string name="status_connecting">Status: Connecting...</string>
+    <string name="battery_unknown">Battery: ?</string>
+    <string name="battery_good">Battery: Good</string>
+    <string name="battery_low">Battery: Low</string>
+    <string name="signal_unknown">Signal: ?</string>
+    <string name="signal_strong">Signal: Strong</string>
+    <string name="signal_weak">Signal: Weak</string>
+    <string name="recent_events">Recent Events</string>
+    <string name="title_home">Camera</string>
+    <string name="device_information">Device Information</string>
+    <string name="device_id_placeholder">Device ID: ---</string>
+    <string name="device_id_value">Device ID: %s</string>
+    <string name="battery_level_placeholder">Battery Level: ---</string>
+    <string name="battery_level_value">Battery Level: %d%%</string>
+    <string name="signal_strength_placeholder">Signal Strength: ---</string>
+    <string name="signal_strength_value">Signal Strength: %d dBm</string>
+    <string name="camera_settings">Camera Settings</string>
+    <string name="motion_sensitivity">Motion Sensitivity</string>
+    <string name="image_quality">Image Quality</string>
+    <string name="reporting_interval_hint">Reporting Interval (minutes)</string>
+    <string name="title_settings">Settings</string>
+
+    <string name="event_thumbnail">Event thumbnail</string>
+
+    <string name="title_nodes">Nodes</string>
+    <string name="connect_main_camera_prompt">Connect main camera to view nodes</string>
+    <string name="expand_node_details">Expand node details</string>
+
+    <string name="detectable_animals">Detectable Animals</string>
+    <string name="animal_cat">Cat</string>
+    <string name="animal_dog">Dog</string>
+    <string name="animal_squirrel">Squirrel</string>
+    <string name="animal_bird">Bird</string>
+    <string name="update_node_settings">Update Node</string>
+
+    <string name="app_logo_description">Smart Trail Camera</string>
+    <string name="footer_logo_description">University Logo</string>
+
+
+
+    <string name="status_connected_to">Connected to %1$s</string>
+
+    <string name="default_notification_channel_name">General Notifications</string>
+    <string name="default_notification_channel_description">Default channel for app notifications</string>
+</resources>
